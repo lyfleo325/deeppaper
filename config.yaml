@@ -1,0 +1,329 @@
+# ============================================================
+# Paper Automation Configuration
+# 论文自动化筛选 & 精读 & Obsidian推送 配置
+# ============================================================
+
+schedule:
+  # 运行时间 (Asia/Shanghai)
+  days: [Monday, Thursday]
+  hour: 11
+  minute: 0
+
+# Obsidian知识库路径
+obsidian:
+  kb_root: "C:\\Users\\Leo\\Desktop\\KB"
+  daily_dir: "Daily"
+  projects:
+    PhysBrain: "Projects\\PhysBrain"
+    能量原理: "Projects\\能量原理"
+    科研智能体: "Projects\\科研智能体"
+    多模态: "Projects\\多模态"
+    AI算力集群: "Projects\\AI算力集群"
+  mocs:
+    智能体: "MOCs\\智能体.md"
+    全部论文: "MOCs\\全部论文.md"
+
+# 每次每个方向推荐的论文数
+papers_per_direction: 2
+
+# ============================================================
+# 5大研究方向定义
+# ============================================================
+directions:
+  - name: "具身智能"
+    ob_project: "PhysBrain"
+    tag: "embodied-ai"
+    moc_link: "PhysBrain"
+    keywords:
+      primary:
+        - "embodied intelligence"
+        - "embodied AI"
+        - "robot learning"
+        - "world model"
+        - "embodied foundation model"
+        - "physical world"
+        - "manipulation"
+        - "navigation"
+        - "sim-to-real"
+        - "reinforcement learning robotics"
+        - "imitation learning"
+        - "visuomotor"
+        - "VLA"
+        - "vision-language-action"
+        - "robot manipulation"
+        - "dexterous manipulation"
+        - "quadruped"
+        - "humanoid robot"
+      secondary:
+        - "benchmark embodied"
+        - "robot dataset"
+        - "simulation environment"
+        - "grasping"
+        - "locomotion"
+        - "task planning"
+        - "skill learning"
+        - "transfer learning"
+        - "domain randomization"
+      exclude:
+        - "medical"
+        - "bio"
+        - "chemistry"
+    venue_filter:
+      - "CoRL"
+      - "ICRA"
+      - "IROS"
+      - "RSS"
+      - "NeurIPS"
+      - "ICLR"
+      - "ICML"
+      - "CVPR"
+      - "arXiv"
+
+  - name: "能量原理"
+    ob_project: "能量原理"
+    tag: "energy-principles"
+    moc_link: "能量原理"
+    keywords:
+      primary:
+        - "energy-based model"
+        - "energy function"
+        - "transformer architecture"
+        - "attention mechanism"
+        - "linear attention"
+        - "state space model"
+        - "SSM"
+        - "Mamba"
+        - "RWKV"
+        - "sparse attention"
+        - "mixture of experts"
+        - "MoE"
+        - "model compression"
+        - "quantization"
+        - "pruning"
+        - "knowledge distillation"
+        - "learning dynamics"
+        - "optimization landscape"
+        - "loss landscape"
+        - "neural tangent kernel"
+      secondary:
+        - "pre-training efficiency"
+        - "scaling law"
+        - "training dynamics"
+        - "gradient flow"
+        - "Hessian"
+        - "convergence"
+        - "generalization bound"
+        - "PAC-Bayes"
+        - "information bottleneck"
+        - "entropy"
+        - "free energy"
+        - "variational inference"
+        - "mean field theory"
+      exclude:
+        - "computer vision"
+        - "image segmentation"
+        - "object detection"
+    venue_filter:
+      - "NeurIPS"
+      - "ICLR"
+      - "ICML"
+      - "JMLR"
+      - "TMLR"
+      - "arXiv"
+      - "COLT"
+
+  - name: "科研智能体"
+    ob_project: "科研智能体"
+    tag: "research-agent"
+    moc_link: "智能体"
+    keywords:
+      primary:
+        - "AI scientist"
+        - "research agent"
+        - "scientific discovery"
+        - "automated research"
+        - "deep research"
+        - "LLM agent"
+        - "AI agent"
+        - "autonomous agent"
+        - "multi-agent"
+        - "tool use"
+        - "function calling"
+        - "code generation agent"
+        - "reasoning agent"
+        - "science of science"
+        - "research automation"
+      secondary:
+        - "agent benchmark"
+        - "agent evaluation"
+        - "SWE-bench"
+        - "agent framework"
+        - "workflow"
+        - "planning"
+        - "self-improvement"
+        - "self-correction"
+        - "reflection"
+        - "memory agent"
+        - "retrieval augmented"
+        - "RAG agent"
+      exclude:
+        - "game"
+        - "dialogue system"
+        - "chatbot"
+    venue_filter:
+      - "NeurIPS"
+      - "ICLR"
+      - "ICML"
+      - "ACL"
+      - "EMNLP"
+      - "arXiv"
+      - "NAACL"
+
+  - name: "多模态认知大模型"
+    ob_project: "多模态"
+    tag: "multimodal"
+    moc_link: "多模态"
+    keywords:
+      primary:
+        - "multimodal large language model"
+        - "vision language model"
+        - "VLM"
+        - "MLLM"
+        - "multimodal reasoning"
+        - "visual reasoning"
+        - "latent reasoning"
+        - "chain of thought multimodal"
+        - "image understanding"
+        - "video understanding"
+        - "multimodal agent"
+        - "visual question answering"
+        - "cross-modal"
+        - "vision transformer"
+        - "multimodal fusion"
+      secondary:
+        - "inference acceleration"
+        - "KV cache"
+        - "token compression"
+        - "context length"
+        - "long context"
+        - "continual learning multimodal"
+        - "lifelong learning"
+        - "catastrophic forgetting"
+        - "task planning"
+        - "instruction following"
+        - "spatial reasoning"
+        - "temporal reasoning"
+      exclude:
+        - "medical imaging"
+        - "remote sensing"
+        - "satellite"
+    venue_filter:
+      - "CVPR"
+      - "ICCV"
+      - "ECCV"
+      - "NeurIPS"
+      - "ICLR"
+      - "ICML"
+      - "ACL"
+      - "EMNLP"
+      - "arXiv"
+
+  - name: "AI算力集群"
+    ob_project: "AI算力集群"
+    tag: "ai-infrastructure"
+    moc_link: "AI算力集群"
+    keywords:
+      primary:
+        - "FlashAttention"
+        - "high performance computing"
+        - "HPC"
+        - "GPU cluster"
+        - "distributed training"
+        - "model parallelism"
+        - "pipeline parallelism"
+        - "tensor parallelism"
+        - "communication optimization"
+        - "all-reduce"
+        - "collective communication"
+        - "NCCL"
+        - "NVLink"
+        - "InfiniBand"
+        - "RDMA"
+        - "kernel fusion"
+        - "operator optimization"
+        - "CUDA"
+        - "GPU kernel"
+      secondary:
+        - "inference optimization"
+        - "speculative decoding"
+        - "KV cache optimization"
+        - "quantization inference"
+        - "sparsity"
+        - "mixed precision"
+        - "FP8"
+        - "FP4"
+        - "compiler optimization"
+        - "TVM"
+        - "Triton"
+        - "XLA"
+        - "memory optimization"
+        - "offloading"
+      exclude:
+        - "blockchain"
+        - "cryptocurrency"
+        - "edge computing IoT"
+    venue_filter:
+      - "NeurIPS"
+      - "ICLR"
+      - "ICML"
+      - "SC"
+      - "PPoPP"
+      - "ASPLOS"
+      - "ISCA"
+      - "MICRO"
+      - "HPCA"
+      - "arXiv"
+
+# ============================================================
+# API Sources
+# ============================================================
+sources:
+  arxiv:
+    enabled: true
+    base_url: "https://export.arxiv.org/api/query"
+    max_results_per_query: 10
+    categories:
+      - "cs.AI"
+      - "cs.LG"
+      - "cs.CL"
+      - "cs.CV"
+      - "cs.RO"
+      - "cs.AR"
+      - "cs.DC"
+      - "stat.ML"
+    lookback_days: 14
+
+  semantic_scholar:
+    enabled: true
+    base_url: "https://api.semanticscholar.org/graph/v1/paper/search"
+    limit_per_query: 10
+    fields: "title,year,url,abstract,externalIds,authors,venue,journal,publicationDate,citationCount"
+
+  openreview:
+    enabled: true
+    base_url: "https://api2.openreview.net/notes/search"
+    limit_per_query: 10
+
+# ============================================================
+# 通知配置 (错误时)
+# ============================================================
+notifications:
+  enabled: true
+  log_file: "C:/Users/Leo/Documents/PaperAutomation/logs/automation.log"
+  # Windows event log or popup
+  method: "log"  # log, toast, both
+
+# ============================================================
+# 调试
+# ============================================================
+debug: false
