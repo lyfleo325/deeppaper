@@ -15,6 +15,37 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # ============================================================
+# Retry helper with exponential backoff
+# ============================================================
+def _retry_request(url, timeout=10, max_retries=3):
+    """Perform HTTP GET with exponential backoff retry"""
+    import random
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "PaperAutomation/1.0"})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            last_error = e
+            if e.code == 429:
+                wait = (2 ** attempt) * 3 + random.uniform(0, 2)
+                logger.warning(f"[Retry] 429 rate limited, waiting {wait:.1f}s (attempt {attempt+1}/{max_retries})")
+            elif e.code == 503:
+                wait = (2 ** attempt) * 2 + random.uniform(0, 1)
+                logger.warning(f"[Retry] 503 unavailable, waiting {wait:.1f}s (attempt {attempt+1}/{max_retries})")
+            else:
+                raise
+            time.sleep(wait)
+        except Exception as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                wait = (2 ** attempt) * 2 + random.uniform(0, 1)
+                logger.warning(f"[Retry] {type(e).__name__}, waiting {wait:.1f}s (attempt {attempt+1}/{max_retries})")
+                time.sleep(wait)
+    raise last_error
+
+# ============================================================
 # Arxiv API
 # ============================================================
 def fetch_arxiv(query: str, max_results: int = 10, categories: list = None) -> list:
@@ -40,11 +71,9 @@ def fetch_arxiv(query: str, max_results: int = 10, categories: list = None) -> l
     logger.info(f"[Arxiv] Fetching: {url[:200]}...")
     
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "PaperAutomation/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read().decode("utf-8")
+        data = _retry_request(url, timeout=10, max_retries=3)
     except Exception as e:
-        logger.error(f"[Arxiv] Request failed: {e}")
+        logger.error(f"[Arxiv] Request failed after retries: {e}")
         return papers
     
     root = ET.fromstring(data)
@@ -132,7 +161,7 @@ def fetch_semantic_scholar(query: str, limit: int = 10, fields: str = None) -> l
     
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "PaperAutomation/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except Exception as e:
         logger.error(f"[S2] Request failed: {e}")
@@ -200,7 +229,7 @@ def fetch_openreview(query: str, limit: int = 10) -> list:
     
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "PaperAutomation/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except Exception as e:
         logger.error(f"[OR] Request failed: {e}")

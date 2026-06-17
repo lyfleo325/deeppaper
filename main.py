@@ -7,6 +7,7 @@ import os
 import sys
 import time
 import yaml
+import argparse
 import logging
 import traceback
 from datetime import datetime
@@ -80,7 +81,70 @@ def load_config() -> dict:
     return config
 
 
+def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_dir: str) -> str:
+    """Generate summary checklist file in note/ directory"""
+    from datetime import datetime
+    today = datetime.now().strftime("%Y-%m-%d")
+    directions = config.get("directions", [])
+    
+    lines = [
+        "# 📋 论文精读汇总清单",
+        "",
+        f"> 生成日期: {today}",
+        f"> 总计: {sum(len(v) for v in all_notes.values())} 篇论文 | {len(directions)} 个方向",
+        f"> 状态: 待确认精读",
+        "",
+        "---",
+        "",
+    ]
+    
+    dir_idx = 0
+    for direction in directions:
+        name = direction.get("name", "Unknown")
+        ob_project = direction.get("ob_project", "")
+        notes = all_notes.get(name, [])
+        papers = screened.get(name, [])
+        
+        if not notes:
+            continue
+        
+        dir_idx += 1
+        lines.append(f"## {dir_idx}. {name} ({ob_project}) — {len(notes)} 篇")
+        lines.append("")
+        lines.append("| # | 论文标题 | 分数 | arXiv ID | 精读文件 |")
+        lines.append("|---|----------|------|----------|----------|")
+        
+        for i, (filename, note_content) in enumerate(notes, 1):
+            paper = papers[i-1] if i-1 < len(papers) else {}
+            title = paper.get("title", filename.replace("-论文精读.md", ""))
+            score = paper.get("relevance_score", "-")
+            arxiv_id = paper.get("arxiv_id", "-")
+            lines.append(f"| {i} | {title[:60]} | {score} | {arxiv_id} | [[{filename.replace('.md', '')}]] |")
+        
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+    
+    lines.extend([
+        "## ⚡ 下一步操作",
+        "",
+        "1. 审阅上述论文摘要，筛选需精读的论文",
+        "2. 对选中的论文使用 paper-deep-read skill 进行完整精读",
+        "3. 精读完成后运行 python main.py --push 推送至 Obsidian",
+        "",
+        f"> 💡 提示: 汇总清单仅作索引，详细内容见各论文精读 MD 文件",
+    ])
+    
+    summary_path = os.path.join(note_dir, "_汇总清单.md")
+    summary_content = "\n".join(lines)
+    with open(summary_path, "w", encoding="utf-8") as f:
+        f.write(summary_content)
+    
+    return summary_path
+
+
 def run_pipeline(config: dict = None) -> bool:
+
     """
     运行完整的自动化管线:
     1. Fetch papers from all sources
@@ -153,6 +217,9 @@ def run_pipeline(config: dict = None) -> bool:
         if total_selected == 0:
             logger.warning("No papers selected! Check keyword configuration.")
         
+        # Local note directory
+        note_dir = os.path.join(os.path.dirname(__file__), "note")
+        
         # Step 3: Generate deep-read notes
         logger.info("[Step 3/5] Generating deep-read notes...")
         all_notes = generate_all_notes(screened, config)
@@ -160,7 +227,37 @@ def run_pipeline(config: dict = None) -> bool:
         total_notes = sum(len(v) for v in all_notes.values())
         logger.info(f"[Step 3/5] Generated {total_notes} notes")
         
-        # Step 4: Push to Obsidian
+        # Save local copy to note/ directory
+        local_saved = 0
+        os.makedirs(note_dir, exist_ok=True)
+        for dir_name, notes in all_notes.items():
+            for filename, note_content in notes:
+                try:
+                    local_path = os.path.join(note_dir, filename)
+                    with open(local_path, "w", encoding="utf-8") as f:
+                        f.write(note_content)
+                    local_saved += 1
+                except Exception as e:
+                    logger.error(f"[Local] Failed to save '{filename}': {e}")
+        logger.info(f"[Local] Saved {local_saved} notes to {note_dir}")
+        
+        # Generate summary checklist
+        summary_path = generate_summary_list(all_notes, screened, config, note_dir)
+        logger.info(f"[Local] Summary checklist: {summary_path}")
+        
+        # Step 4: Push to Obsidian (only if --push flag is set)
+        push_to_obsidian_enabled = config.get("_push_to_obsidian", False)
+        if not push_to_obsidian_enabled:
+            logger.info("[Step 4/5] Obsidian push SKIPPED (use --push to enable)")
+            logger.info("[Step 5/5] Verification SKIPPED (local-only mode)")
+            elapsed = time.time() - start_time
+            logger.info("=" * 60)
+            logger.info(f"Pipeline COMPLETED (local-only) in {elapsed:.1f}s")
+            logger.info(f"[INFO] Notes saved to {note_dir}")
+            logger.info(f"[INFO] Run 'python main.py --push' to push to Obsidian")
+            logger.info("=" * 60)
+            return True
+        
         logger.info("[Step 4/5] Pushing to Obsidian...")
         stats = push_to_obsidian(all_notes, config)
         logger.info(
@@ -202,8 +299,16 @@ def run_pipeline(config: dict = None) -> bool:
 
 def main():
     """主入口"""
+    parser = argparse.ArgumentParser(description="PaperAutomation - 论文自动化筛选与精读")
+    parser.add_argument("--push", action="store_true", help="推送至 Obsidian 知识库")
+    parser.add_argument("--local-only", action="store_true", default=True, help="仅本地生成 (默认)")
+    args = parser.parse_args()
+    
     try:
         config = load_config()
+        # Store push flag in config for pipeline access
+        config["_push_to_obsidian"] = args.push
+        
         setup_logging(config)
         logger = logging.getLogger("PaperAutomation")
         logger.info("Paper Automation initialized")
@@ -212,6 +317,8 @@ def main():
         
         if success:
             logger.info("[OK] Automation finished successfully")
+            if not args.push:
+                logger.info("[INFO] 精读笔记已存入 note/ 目录，审阅后运行 python main.py --push 推送至 Obsidian")
             sys.exit(0)
         else:
             logger.warning("[WARN] Automation finished with errors")
