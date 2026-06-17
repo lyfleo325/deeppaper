@@ -81,22 +81,60 @@ def load_config() -> dict:
     return config
 
 
+
+def _translate_abstract(text: str) -> str:
+    """Translate English abstract to Simplified Chinese via Google Translate"""
+    if not text or len(text) < 10:
+        return text
+    try:
+        import urllib.request, urllib.parse, json
+        chunk = text[:800]
+        q = urllib.parse.quote(chunk)
+        url = f"https://translate.google.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q={q}"
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://translate.google.com/",
+        })
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            translated = "".join([s[0] for s in result[0] if s and s[0]])
+            if translated and len(translated) > 5 and translated != text:
+                return translated
+    except Exception as e:
+        logging.getLogger("PaperAutomation").warning(f"[Translate] Failed: {e}")
+    return text  # fallback to original
+
+
 def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_dir: str) -> str:
-    """Generate summary checklist file in note/ directory"""
+    """Generate summary checklist with abstracts and Chinese translations"""
     from datetime import datetime
+    import json
     today = datetime.now().strftime("%Y-%m-%d")
     directions = config.get("directions", [])
+    total = sum(len(v) for v in all_notes.values())
     
     lines = [
         "# 📋 论文精读汇总清单",
         "",
         f"> 生成日期: {today}",
-        f"> 总计: {sum(len(v) for v in all_notes.values())} 篇论文 | {len(directions)} 个方向",
+        f"> 总计: {total} 篇论文 | {len(directions)} 个方向",
         f"> 状态: 待确认精读",
         "",
         "---",
         "",
+        "## 📖 论文目录",
+        "",
     ]
+    
+    for direction in directions:
+        name = direction.get("name", "")
+        notes = all_notes.get(name, [])
+        if not notes:
+            continue
+        anchor = name
+        lines.append(f"- [{name}](#{anchor}) ({len(notes)}篇)")
+    
+    lines.extend(["", "---", ""])
     
     dir_idx = 0
     for direction in directions:
@@ -104,12 +142,11 @@ def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_di
         ob_project = direction.get("ob_project", "")
         notes = all_notes.get(name, [])
         papers = screened.get(name, [])
-        
         if not notes:
             continue
         
         dir_idx += 1
-        lines.append(f"## {dir_idx}. {name} ({ob_project}) — {len(notes)} 篇")
+        lines.append(f"## 📌 {name} ({ob_project})")
         lines.append("")
         lines.append("| # | 论文标题 | 分数 | arXiv ID | 精读文件 |")
         lines.append("|---|----------|------|----------|----------|")
@@ -122,18 +159,35 @@ def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_di
             lines.append(f"| {i} | {title[:60]} | {score} | {arxiv_id} | [[{filename.replace('.md', '')}]] |")
         
         lines.append("")
-        lines.append("---")
-        lines.append("")
-    
-    lines.extend([
-        "## ⚡ 下一步操作",
-        "",
-        "1. 审阅上述论文摘要，筛选需精读的论文",
-        "2. 对选中的论文使用 paper-deep-read skill 进行完整精读",
-        "3. 精读完成后运行 python main.py --push 推送至 Obsidian",
-        "",
-        f"> 💡 提示: 汇总清单仅作索引，详细内容见各论文精读 MD 文件",
-    ])
+        
+        # Detailed abstracts with translations
+        for i, (filename, note_content) in enumerate(notes, 1):
+            paper = papers[i-1] if i-1 < len(papers) else {}
+            title = paper.get("title", "")
+            score = paper.get("relevance_score", "-")
+            arxiv_id = paper.get("arxiv_id", "-")
+            url = paper.get("url", f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else "")
+            abstract = paper.get("abstract", "No abstract available.")
+            
+            # Translate
+            logging.getLogger("PaperAutomation").info(f"[Translate] Translating abstract for: {title[:50]}...")
+            zh_abstract = _translate_abstract(abstract) if abstract else ""
+            
+            lines.append(f"### {i}. {title}")
+            lines.append("")
+            lines.append(f"- **分数**: {score} | **arXiv**: [{arxiv_id}]({url})")
+            lines.append(f"- **精读文件**: [[{filename.replace('.md', '')}]]")
+            lines.append("")
+            lines.append("**🔤 英文摘要 (Original Abstract)**")
+            lines.append("")
+            lines.append(f"> {abstract[:1200]}")
+            lines.append("")
+            lines.append("**🇨🇳 中文摘要 (Chinese Translation)**")
+            lines.append("")
+            lines.append(f"> {zh_abstract[:1200]}")
+            lines.append("")
+            lines.append("---")
+            lines.append("")
     
     summary_path = os.path.join(note_dir, "_汇总清单.md")
     summary_content = "\n".join(lines)
