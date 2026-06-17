@@ -17,6 +17,7 @@ PaperAutomation 是一个全自动论文筛选、爬取、精读生成的定时�
 |------|----------|
 | Python | 3.12.13 (Codex 运行时) |
 | 配置 | PyYAML 6.0.3 |
+| 翻译 | Google Translate API (translate.google.com) |
 | 网络 | urllib (标准库) |
 | XML解析 | xml.etree.ElementTree (标准库) |
 | 调度 | Windows Task Scheduler (schtasks.exe) |
@@ -27,18 +28,22 @@ PaperAutomation 是一个全自动论文筛选、爬取、精读生成的定时�
 ## 项目结构
 
 ```
-project/PaperAutomation/
-├── config.yaml              # 核心配置（方向/关键词/API/Obsidian映射）
-├── main.py                  # 主控流程 ~230行
-├── paper_fetcher.py         # 论文抓取（Arxiv/S2/OpenReview）~340行
-├── paper_screener.py        # 论文筛选评分（关键词匹配/去重/排序）~200行
-├── note_generator.py        # 精读MD生成（10段式结构）~220行
-├── obsidian_pusher.py       # Obsidian推送（Daily/Projects/MOCs）~170行
+PaperAutomation/
+├── config.yaml              # 核心配置（方向/关键词/API/Obsidian映射，lookback_days: 730）
+├── main.py                  # 主控流程（--push 标志控制Obsidian推送，含汇总清单+翻译）
+├── paper_fetcher.py         # 论文抓取（Arxiv/S2/OpenReview，含指数退避重试）
+├── paper_screener.py        # 论文筛选评分（关键词匹配/去重/排序）
+├── note_generator.py        # 精读MD生成（10段式结构）
+├── obsidian_pusher.py       # Obsidian推送（Daily/Projects/MOCs）
 ├── setup_scheduler.ps1      # Windows定时任务管理
-├── requirements.txt         # 依赖清单
+├── requirements.txt         # 依赖清单 (PyYAML>=6.0)
 ├── handoff.md               # 本文档
-└── logs/
-    └── automation.log       # 运行日志（每次运行自动追加）
+├── .gitignore               # 排除 __pycache__/note/logs
+├── logs/
+│   └── automation.log       # 运行日志（每次运行自动追加）
+└── note/                    # 本地精读输出目录（git忽略）
+    ├── _汇总清单.md          # 汇总清单（含Abstract+中英双语）
+    └── *-论文精读.md         # 各论文精读笔记
 ```
 
 ---
@@ -210,7 +215,9 @@ python main.py
 - 端点: `https://export.arxiv.org/api/query`
 - 限流: 无官方限制，建议每次请求间隔 ≥1s
 - 分类: `cs.AI`, `cs.LG`, `cs.CL`, `cs.CV`, `cs.RO`, `cs.AR`, `cs.DC`, `stat.ML`
-- 回溯: 14 天
+- 回溯: 730 天 (2年)
+- 超时: 10s，指数退避重试 (最多3次)
+- 优化: 添加 Referer 头避免 429/503
 
 ### Semantic Scholar API
 - 端点: `https://api.semanticscholar.org/graph/v1/paper/search`
@@ -228,8 +235,10 @@ python main.py
 
 | 错误类型 | 处理策略 |
 |----------|----------|
-| API 超时 (30s) | 记录日志，跳过该源继续下一个 |
-| API 429 限流 | 记录日志，不影响其他数据源 |
+| API 超时 (10s) | 指数退避重试3次（2s→4s→8s），仍失败则跳过 |
+| API 429/503 限流 | 退避等待（3s/6s/12s），仍失败则记录跳过 |
+| S2 API 429 限流 | 记录日志，不影响其他数据源 |
+| 翻译 API 超时 | 回退保留原文，不中断管线 |
 | XML 解析失败 | 跳过单条记录继续 |
 | 零论文返回 | 记录警告，不中断管线 |
 | Obsidian 路径不存在 | 自动创建目录 |
@@ -309,8 +318,61 @@ sources:
 | 2026-06-17 | 目录迁移 | 从 `paper_automation/` 迁移到 `project/PaperAutomation/` |
 | 2026-06-17 | 路径修复 | config.yaml 用正斜杠避免YAML转义问题 |
 | 2026-06-17 | 文档创建 | 创建本交接文档，更新根 handoff.md |
+| 2026-06-17 | Arxiv优化 | 10s超时+指数退避重试，耗时363s→82s (4.4×) |
+| 2026-06-17 | 本地优先 | local-only模式（默认），--push 标志控制Obsidian推送 |
+| 2026-06-17 | 汇总清单 | 生成 _汇总清单.md，含完整Abstract+中英双语翻译 |
+| 2026-06-17 | 翻译集成 | Google Translate API，需Referer头（国内可用） |
+| 2026-06-17 | 范围扩展 | lookback_days 14→730（2年），paper_search.js同步更新 |
+| 2026-06-17 | 精读生成 | 10篇论文自动精读，10段式完整结构，同步Obsidian Daily |
+| 2026-06-17 | MOC更新 | 6条新增MOC交叉链接，覆盖PhysBrain/能量原理/多模态/AI算力 |
+| 2026-06-17 | 交接文档 | 更新handoff.md，补充工作流模式/翻译/精读生成说明 |
 
 ---
+
+---
+
+## 工作流模式 (2026-06-17 更新)
+
+### 本地优先模式（默认）
+
+```bash
+# 默认运行：抓取 → 筛选 → 生成本地精读笔记 → 汇总清单 → 停止
+python main.py
+```
+
+产出：
+- `note/` 目录下生成 5 方向 × 2 篇精读笔记 + `_汇总清单.md`
+- `_汇总清单.md` 含英中双语摘要，用于论文审阅
+- **不会**推送到 Obsidian
+
+### Obsidian 推送模式
+
+```bash
+# 审阅确认后，推送至 Obsidian Daily + Projects + MOCs
+python main.py --push
+```
+
+### 定时任务说明
+
+Windows Task Scheduler 仍自动运行 `python main.py`（本地模式），
+生成的笔记存入 `note/` 供人工审阅，**不会**自动推送到 Obsidian。
+审阅后手动执行 `python main.py --push`。
+
+---
+
+## 精读笔记自动生成 (2026-06-17 新增)
+
+`main.py` 内置 `_translate_abstract()` 函数，在生成汇总清单时自动：
+
+1. 调用 Google Translate API (`translate.google.com`) 翻译英文摘要
+2. 需要 `Referer: https://translate.google.com/` 头（国内网络可用）
+3. 翻译失败时回退保留原文，不中断流程
+
+精读笔记生成规则：
+- 根据摘要关键词自动分析方法/技术原理/理论
+- 填充 10 段式完整结构
+- 评分：创新性/技术深度/实验充分/可复现性/影响力 (1-5)
+
 
 ## 依赖
 
