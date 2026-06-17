@@ -273,7 +273,7 @@ def fetch_openreview(query: str, limit: int = 10) -> list:
 # ============================================================
 # Arxiv RSS / New submissions (by category, recent)
 # ============================================================
-def fetch_arxiv_recent(categories: list = None, lookback_days: int = 14) -> list:
+def fetch_arxiv_recent(categories: list = None, lookback_days: int = 730) -> list:
     """获取Arxiv上最近N天的新论文"""
     if categories is None:
         categories = ["cs.AI", "cs.LG", "cs.CL", "cs.CV", "cs.RO"]
