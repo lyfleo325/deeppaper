@@ -106,37 +106,47 @@ def _translate_abstract(text: str) -> str:
 
 
 def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_dir: str) -> str:
-    """Generate summary checklist with abstracts and Chinese translations"""
+    """Generate PaperAuto Checklist to Obsidian Daily with recommendation reasons"""
+    import logging
     from datetime import datetime
-    import json
-    today = datetime.now().strftime("%Y-%m-%d")
+    logger = logging.getLogger("PaperAutomation")
+    today = datetime.now()
+    today_str = today.strftime("%Y-%m-%d")
     directions = config.get("directions", [])
     total = sum(len(v) for v in all_notes.values())
-    
+
+    kb_root = config.get("obsidian", {}).get("kb_root", r"C:\Users\Leo\Desktop\KB")
+    daily_date = f"{today.year}-{today.month}-{today.day}"
+    daily_dir = os.path.join(kb_root, "Daily", daily_date)
+    os.makedirs(daily_dir, exist_ok=True)
+
+    checklist_name = f"{daily_date} PaperAuto Checklist.md"
+    checklist_path = os.path.join(daily_dir, checklist_name)
+
     lines = [
-        "# 📋 论文精读汇总清单",
+        f"# \U0001f4cb {daily_date} PaperAuto Checklist",
         "",
-        f"> 生成日期: {today}",
-        f"> 总计: {total} 篇论文 | {len(directions)} 个方向",
-        f"> 状态: 待确认精读",
+        f"> **\u751f\u6210\u65f6\u95f4**: {today.strftime('%Y-%m-%d %H:%M')}",
+        f"> **\u603b\u8ba1**: {total} \u7bc7\u63a8\u8350\u8bba\u6587 | {len(directions)} \u4e2a\u7814\u7a76\u65b9\u5411",
+        f"> **\u72b6\u6001**: \U0001f534 \u5f85\u5ba1\u9605\u786e\u8ba4",
         "",
         "---",
         "",
-        "## 📖 论文目录",
+        "## \U0001f4d6 \u5feb\u901f\u7d22\u5f15",
         "",
     ]
-    
+
     for direction in directions:
         name = direction.get("name", "")
         notes = all_notes.get(name, [])
         if not notes:
             continue
-        anchor = name
-        lines.append(f"- [{name}](#{anchor}) ({len(notes)}篇)")
-    
+        lines.append(f"- [{name}](#{name}) ({len(notes)}\u7bc7)")
+
     lines.extend(["", "---", ""])
-    
-    dir_idx = 0
+
+    paper_idx = 0
+
     for direction in directions:
         name = direction.get("name", "Unknown")
         ob_project = direction.get("ob_project", "")
@@ -144,23 +154,23 @@ def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_di
         papers = screened.get(name, [])
         if not notes:
             continue
-        
-        dir_idx += 1
-        lines.append(f"## 📌 {name} ({ob_project})")
+
+        lines.append(f"## \U0001f4cc {name} \u2192 `{ob_project}`")
         lines.append("")
-        lines.append("| # | 论文标题 | 分数 | arXiv ID | 精读文件 |")
-        lines.append("|---|----------|------|----------|----------|")
-        
+        lines.append("| # | \u52fe\u9009 | \u8bba\u6587\u6807\u9898 | \u8bc4\u5206 | arXiv |")
+        lines.append("|---|------|----------|------|-------|")
+
         for i, (filename, note_content) in enumerate(notes, 1):
             paper = papers[i-1] if i-1 < len(papers) else {}
-            title = paper.get("title", filename.replace("-论文精读.md", ""))
+            title = paper.get("title", filename.replace("-\u8bba\u6587\u7cbe\u8bfb.md", ""))
             score = paper.get("relevance_score", "-")
             arxiv_id = paper.get("arxiv_id", "-")
-            lines.append(f"| {i} | {title[:60]} | {score} | {arxiv_id} | [[{filename.replace('.md', '')}]] |")
-        
+            lines.append(f"| {i} | [ ] | {title[:55]} | {score} | [{arxiv_id}](https://arxiv.org/abs/{arxiv_id}) |")
+
         lines.append("")
-        
-        # Detailed abstracts with translations
+        lines.append("---")
+        lines.append("")
+
         for i, (filename, note_content) in enumerate(notes, 1):
             paper = papers[i-1] if i-1 < len(papers) else {}
             title = paper.get("title", "")
@@ -168,33 +178,118 @@ def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_di
             arxiv_id = paper.get("arxiv_id", "-")
             url = paper.get("url", f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else "")
             abstract = paper.get("abstract", "No abstract available.")
-            
-            # Translate
-            logging.getLogger("PaperAutomation").info(f"[Translate] Translating abstract for: {title[:50]}...")
+
+            paper_idx += 1
+            logger.info(f"[Checklist] Translating: {title[:50]}...")
             zh_abstract = _translate_abstract(abstract) if abstract else ""
-            
-            lines.append(f"### {i}. {title}")
+            rec_reason = _generate_recommendation_reason(paper, direction, score)
+
+            lines.append(f"### {paper_idx}. {title}")
             lines.append("")
-            lines.append(f"- **分数**: {score} | **arXiv**: [{arxiv_id}]({url})")
-            lines.append(f"- **精读文件**: [[{filename.replace('.md', '')}]]")
+            lines.append(f"- [ ] **\u7cbe\u8bfb\u786e\u8ba4**")
+            lines.append(f"- **\u8bc4\u5206**: {score} | **arXiv**: [{arxiv_id}]({url})")
+            lines.append(f"- **\u6570\u636e\u6e90**: {paper.get('source', 'Unknown')}")
             lines.append("")
-            lines.append("**🔤 英文摘要 (Original Abstract)**")
+
+            lines.append("**\U0001f524 \u82f1\u6587\u6458\u8981**")
             lines.append("")
-            lines.append(f"> {abstract[:1200]}")
+            lines.append(f"> {abstract[:1000]}")
             lines.append("")
-            lines.append("**🇨🇳 中文摘要 (Chinese Translation)**")
+
+            lines.append("**\U0001f1e8\U0001f1f3 \u4e2d\u6587\u6458\u8981**")
             lines.append("")
-            lines.append(f"> {zh_abstract[:1200]}")
+            lines.append(f"> {zh_abstract[:1000]}")
+            lines.append("")
+
+            lines.append("**\U0001f4a1 \u63a8\u8350\u539f\u56e0\u4e0e\u65b9\u5411\u5173\u8054**")
+            lines.append("")
+            lines.append(f"> {rec_reason}")
             lines.append("")
             lines.append("---")
             lines.append("")
-    
-    summary_path = os.path.join(note_dir, "_汇总清单.md")
-    summary_content = "\n".join(lines)
-    with open(summary_path, "w", encoding="utf-8") as f:
-        f.write(summary_content)
-    
-    return summary_path
+
+    lines.extend([
+        "## \u26a1 \u5ba1\u9605\u64cd\u4f5c\u6307\u5357",
+        "",
+        "1. \u9605\u8bfb\u5404\u8bba\u6587\u7684\u4e2d\u82f1\u6587\u6458\u8981\u548c\u63a8\u8350\u539f\u56e0",
+        "2. \u52fe\u9009 `[x]` \u6807\u8bb0\u9700\u8981\u7cbe\u8bfb\u7684\u8bba\u6587",
+        "3. \u5728 Codex \u4e2d\u544a\u77e5: **\u5bf9\u52fe\u9009\u7684\u8bba\u6587\u8fdb\u884c\u7cbe\u8bfb**",
+        "4. \u7cbe\u8bfb\u5b8c\u6210\u540e\u8fd0\u884c `python main.py --push` \u63a8\u9001\u81f3 Obsidian Projects",
+        "",
+        "> \U0001f4a1 \u53ef\u5728 Obsidian \u4e2d\u76f4\u63a5\u7f16\u8f91\u6b64\u6e05\u5355\uff0c\u4fee\u6539\u540e\u81ea\u52a8\u540c\u6b65",
+    ])
+
+    checklist_content = "\n".join(lines)
+    with open(checklist_path, "w", encoding="utf-8") as f:
+        f.write(checklist_content)
+
+    local_path = os.path.join(note_dir, "_Checklist.md")
+    with open(local_path, "w", encoding="utf-8") as f:
+        f.write(checklist_content)
+
+    logger.info(f"[Checklist] Saved: {checklist_path}")
+    return checklist_path
+
+
+def _generate_recommendation_reason(paper: dict, direction: dict, score) -> str:
+    """Generate recommendation reason and relevance analysis"""
+    title = paper.get("title", "")
+    abstract = paper.get("abstract", "").lower()
+    dir_name = direction.get("name", "")
+    keywords = direction.get("keywords", {})
+    primary_kw = [k.lower() for k in keywords.get("primary", [])]
+
+    matched = []
+    for kw in primary_kw:
+        if kw.lower() in title.lower() or kw.lower() in abstract:
+            matched.append(kw)
+
+    reasons = []
+
+    if "\u5177\u8eab" in dir_name:
+        if any(k in abstract for k in ["robot", "manipulation", "embodied"]):
+            reasons.append("\u76f4\u63a5\u6d89\u53ca\u5177\u8eab\u667a\u80fd\u6838\u5fc3\u95ee\u9898\uff08\u673a\u5668\u4eba\u64cd\u63a7/\u611f\u77e5/\u5bfc\u822a\uff09")
+        if any(k in abstract for k in ["world model", "simulator", "sim-to-real"]):
+            reasons.append("\u6d89\u53ca\u4e16\u754c\u6a21\u578b\u6216\u4eff\u771f\u5230\u73b0\u5b9e\u8fc1\u79fb\uff0c\u662f\u5177\u8eab\u667a\u80fd\u7684\u5173\u952e\u6280\u672f")
+        if any(k in abstract for k in ["vla", "vision-language-action"]):
+            reasons.append("\u89c6\u89c9-\u8bed\u8a00-\u52a8\u4f5c\uff08VLA\uff09\u7edf\u4e00\u6846\u67b6\uff0c\u5177\u8eab\u667a\u80fd\u524d\u6cbf\u65b9\u5411")
+    elif "\u80fd\u91cf" in dir_name:
+        if any(k in abstract for k in ["energy", "optimization", "dynamics"]):
+            reasons.append("\u4ece\u80fd\u91cf/\u4f18\u5316/\u52a8\u529b\u5b66\u89d2\u5ea6\u5206\u6790\u6a21\u578b\u884c\u4e3a")
+        if any(k in abstract for k in ["mamba", "ssm", "state space"]):
+            reasons.append("\u72b6\u6001\u7a7a\u95f4\u6a21\u578b\u76f8\u5173\uff0c\u6d89\u53ca\u5e8f\u5217\u5efa\u6a21\u6548\u7387\u7406\u8bba\u5206\u6790")
+        if any(k in abstract for k in ["moe", "mixture", "routing"]):
+            reasons.append("\u6df7\u5408\u4e13\u5bb6\u8def\u7531\u673a\u5236\uff0c\u6d89\u53ca\u6a21\u578b\u5bb9\u91cf\u4e0e\u6548\u7387\u7684\u6743\u8861\u5206\u6790")
+    elif "\u79d1\u7814" in dir_name:
+        if any(k in abstract for k in ["agent", "multi-agent", "llm"]):
+            reasons.append("LLM\u9a71\u52a8\u7684\u667a\u80fd\u4f53\u7cfb\u7edf\uff0c\u76f4\u63a5\u8d21\u732e\u4e8e\u79d1\u7814\u81ea\u52a8\u5316\u5de5\u5177\u94fe")
+        if any(k in abstract for k in ["communication", "protocol", "coordination"]):
+            reasons.append("\u667a\u80fd\u4f53\u95f4\u901a\u4fe1\u4e0e\u534f\u8c03\u673a\u5236\uff0c\u591a\u667a\u80fd\u4f53\u7cfb\u7edf\u6838\u5fc3\u6311\u6218")
+        if any(k in abstract for k in ["self-correct", "self-improve", "feedback"]):
+            reasons.append("\u81ea\u7ea0\u6b63/\u81ea\u6539\u8fdb\u673a\u5236\uff0c\u63d0\u5347\u667a\u80fd\u4f53\u7cfb\u7edf\u53ef\u9760\u6027")
+    elif "\u591a\u6a21\u6001" in dir_name:
+        if any(k in abstract for k in ["vision", "language", "multimodal"]):
+            reasons.append("\u89c6\u89c9-\u8bed\u8a00\u591a\u6a21\u6001\u878d\u5408\uff0c\u8be5\u65b9\u5411\u6838\u5fc3\u7814\u7a76\u4e3b\u9898")
+        if any(k in abstract for k in ["distillation", "cross-modal", "transfer"]):
+            reasons.append("\u8de8\u6a21\u6001\u77e5\u8bc6\u8fc1\u79fb/\u84b8\u998f\uff0c\u63d0\u5347\u591a\u6a21\u6001\u6a21\u578b\u6548\u7387")
+        if any(k in abstract for k in ["reasoning", "spatial", "visual"]):
+            reasons.append("\u89c6\u89c9\u63a8\u7406\u80fd\u529b\u589e\u5f3a\uff0c\u591a\u6a21\u6001\u8ba4\u77e5\u6838\u5fc3\u6311\u6218")
+    elif "\u7b97\u529b" in dir_name:
+        if any(k in abstract for k in ["hpc", "gpu", "inference", "training"]):
+            reasons.append("\u9ad8\u6027\u80fd\u8ba1\u7b97/\u63a8\u7406\u4f18\u5316\uff0c\u76f4\u63a5\u8d21\u732e\u4e8eAI\u57fa\u7840\u8bbe\u65bd\u6548\u7387\u63d0\u5347")
+        if any(k in abstract for k in ["memory", "throughput", "latency"]):
+            reasons.append("\u5185\u5b58/\u541e\u5410\u91cf/\u5ef6\u8fdf\u4f18\u5316\uff0c\u7b97\u529b\u96c6\u7fa4\u5173\u952e\u6307\u6807")
+        if any(k in abstract for k in ["distributed", "parallel", "pipeline"]):
+            reasons.append("\u5206\u5e03\u5f0f/\u5e76\u884c/\u6d41\u6c34\u7ebf\u67b6\u6784\uff0cAI\u7b97\u529b\u96c6\u7fa4\u6838\u5fc3\u8bbe\u8ba1")
+
+    if not reasons:
+        reasons.append(f"\u4e0e\u300c{dir_name}\u300d\u65b9\u5411\u5173\u952e\u8bcd\u5339\u914d\u5ea6\u9ad8\uff08\u8bc4\u5206 {score}\uff09")
+        if matched:
+            reasons.append(f"\u5339\u914d\u5173\u952e\u8bcd: {', '.join(matched[:5])}")
+        reasons.append("\u6458\u8981\u5185\u5bb9\u8868\u660e\u4e0e\u65b9\u5411\u6838\u5fc3\u7814\u7a76\u4e3b\u9898\u76f8\u5173")
+
+    return "\n".join([f"- {r}" for r in reasons])
+
 
 
 def run_pipeline(config: dict = None) -> bool:

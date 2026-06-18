@@ -1,6 +1,6 @@
 ﻿# PaperAutomation — 论文自动化筛选与精读 交接文档
 
-> 创建: 2026-06-16 | 最后更新: 2026-06-17
+> 创建: 2026-06-16 | 最后更新: 2026-06-18
 > 状态: 运行中 ✅ | 定时任务: 周一/周四 11:00
 
 ---
@@ -326,24 +326,45 @@ sources:
 | 2026-06-17 | 精读生成 | 10篇论文自动精读，10段式完整结构，同步Obsidian Daily |
 | 2026-06-17 | MOC更新 | 6条新增MOC交叉链接，覆盖PhysBrain/能量原理/多模态/AI算力 |
 | 2026-06-17 | 交接文档 | 更新handoff.md，补充工作流模式/翻译/精读生成说明 |
+| 2026-06-18 | 工作流重构 | Checklist输出到Obsidian Daily，命名YYYY-M-D PaperAuto Checklist |
+| 2026-06-18 | 推荐增强 | 每篇论文含推荐原因+方向关联分析+勾选框审阅机制 |
+| 2026-06-18 | 流程分离 | 审阅→精读→推送三阶段，用户决定精读范围 |
 
 ---
 
 ---
 
-## 工作流模式 (2026-06-17 更新)
+## 工作流模式 (2026-06-18 更新)
 
-### 本地优先模式（默认）
+### 审阅优先模式（默认）
 
 ```bash
-# 默认运行：抓取 → 筛选 → 生成本地精读笔记 → 汇总清单 → 停止
+# 默认运行：抓取 → 筛选 → 生成 Checklist 到 Obsidian Daily → 停止
 python main.py
 ```
 
 产出：
-- `note/` 目录下生成 5 方向 × 2 篇精读笔记 + `_汇总清单.md`
-- `_汇总清单.md` 含英中双语摘要，用于论文审阅
-- **不会**推送到 Obsidian
+- Obsidian Daily 目录生成 `YYYY-M-D PaperAuto Checklist.md`
+- Checklist 包含：快速索引表 + 每篇论文的英中双语摘要 + **推荐原因与方向关联分析**
+- 每篇论文前有 `[ ]` 勾选框，用户审阅后标记需精读的论文
+- 同时在本地 `note/_Checklist.md` 保存副本
+
+### 用户审阅
+
+1. 打开 Obsidian Daily 中的 `PaperAuto Checklist`
+2. 阅读摘要和推荐原因，勾选 `[x]` 需精读的论文
+3. 在 Codex 中告知：**对勾选的论文进行精读**
+
+### 精读模式
+
+Codex 按用户勾选执行论文精读（paper-deep-read skill），输出到 Obsidian Daily。
+
+### Obsidian 推送模式
+
+```bash
+# 精读完成后，推送至 Obsidian Projects + MOCs
+python main.py --push
+```
 
 ### Obsidian 推送模式
 
