@@ -329,6 +329,8 @@ sources:
 | 2026-06-18 | 工作流重构 | Checklist输出到Obsidian Daily，命名YYYY-M-D PaperAuto Checklist |
 | 2026-06-18 | 推荐增强 | 每篇论文含推荐原因+方向关联分析+勾选框审阅机制 |
 | 2026-06-18 | 流程分离 | 审阅→精读→推送三阶段，用户决定精读范围 |
+| 2026-06-18 | 精读执行 | 8篇6/18推荐论文完成10段式精读，同步Obsidian Daily |
+| 2026-06-18 | 交接同步 | handoff.md补充推荐原因函数/Checklist结构，同步Obsidian |
 
 ---
 
@@ -359,12 +361,30 @@ python main.py
 
 Codex 按用户勾选执行论文精读（paper-deep-read skill），输出到 Obsidian Daily。
 
+### 关键函数说明
+
+| 函数 | 位置 | 说明 |
+|------|------|------|
+| `generate_summary_list()` | main.py | 生成 PaperAuto Checklist，输出到 Obsidian Daily |
+| `_generate_recommendation_reason()` | main.py | 基于关键词匹配和方向模板生成推荐原因 |
+| `_translate_abstract()` | main.py | Google Translate 英→中翻译，需 Referer 头 |
+| `_retry_request()` | paper_fetcher.py | 指数退避重试（3次，2s→4s→8s） |
+
 ### Obsidian 推送模式
 
 ```bash
 # 精读完成后，推送至 Obsidian Projects + MOCs
 python main.py --push
 ```
+
+### 关键函数说明
+
+| 函数 | 位置 | 说明 |
+|------|------|------|
+| `generate_summary_list()` | main.py | 生成 PaperAuto Checklist，输出到 Obsidian Daily |
+| `_generate_recommendation_reason()` | main.py | 基于关键词匹配和方向模板生成推荐原因 |
+| `_translate_abstract()` | main.py | Google Translate 英→中翻译，需 Referer 头 |
+| `_retry_request()` | paper_fetcher.py | 指数退避重试（3次，2s→4s→8s） |
 
 ### Obsidian 推送模式
 
