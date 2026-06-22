@@ -21,6 +21,21 @@ from note_generator import generate_all_notes
 from obsidian_pusher import push_to_obsidian, verify_push
 
 
+def check_dependencies():
+    """Verify required packages are installed"""
+    import subprocess, sys
+    required = {"yaml": "PyYAML"}
+    missing = []
+    for mod, pkg in required.items():
+        try:
+            __import__(mod)
+        except ImportError:
+            missing.append(pkg)
+    if missing:
+        print(f"[WARN] Missing: {missing}. Installing...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing, stdout=subprocess.DEVNULL)
+
+
 def setup_logging(config: dict) -> logging.Logger:
     """设置日志"""
     log_file = config.get("notifications", {}).get(
@@ -447,6 +462,7 @@ def run_pipeline(config: dict = None) -> bool:
 
 
 def main():
+    check_dependencies()
     """主入口"""
     parser = argparse.ArgumentParser(description="PaperAutomation - 论文自动化筛选与精读")
     parser.add_argument("--push", action="store_true", help="推送至 Obsidian 知识库")
