@@ -1,6 +1,6 @@
 ﻿# PaperAutomation — 论文自动化筛选与精读 交接文档
 
-> 创建: 2026-06-16 | 最后更新: 2026-06-18
+> 创建: 2026-06-16 | 最后更新: 2026-06-22
 > 状态: 运行中 ✅ | 定时任务: 周一/周四 11:00
 
 ---
@@ -331,6 +331,9 @@ sources:
 | 2026-06-18 | 流程分离 | 审阅→精读→推送三阶段，用户决定精读范围 |
 | 2026-06-18 | 精读执行 | 8篇6/18推荐论文完成10段式精读，同步Obsidian Daily |
 | 2026-06-18 | 交接同步 | handoff.md补充推荐原因函数/Checklist结构，同步Obsidian |
+| 2026-06-22 | 电池修复 | 定时任务禁用电池限制(DisallowStartIfOnBatteries=false)，避免电源模式跳过 |
+| 2026-06-22 | 依赖检查 | main.py启动时check_dependencies()自动安装缺失的PyYAML |
+| 2026-06-22 | 手动补跑 | 6/22周一管线手动运行，92.6s完成10篇推荐 |
 
 ---
 
@@ -414,6 +417,15 @@ Windows Task Scheduler 仍自动运行 `python main.py`（本地模式），
 - 填充 10 段式完整结构
 - 评分：创新性/技术深度/实验充分/可复现性/影响力 (1-5)
 
+
+---
+
+## 已知陷阱 (2026-06-22 新增)
+
+| 陷阱 | 现象 | 修复 |
+|------|------|------|
+| 电池模式跳过 | 周一/周四 11:00 未运行，Next Run 跳到下次 | 运行: `powershell -Command "$task = Get-ScheduledTask -TaskName 'PaperAutomation'; $task.Settings.DisallowStartIfOnBatteries = $false; $task.Settings.StopIfGoingOnBatteries = $false; Set-ScheduledTask -TaskName 'PaperAutomation' -Settings $task.Settings"` |
+| PyYAML 丢失 | `ModuleNotFoundError: No module named 'yaml'` | main.py 已内置自动安装，或手动 `pip install PyYAML` |
 
 ## 依赖
 
