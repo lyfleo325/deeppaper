@@ -48,9 +48,13 @@ def _retry_request(url, timeout=10, max_retries=3):
 # ============================================================
 # Arxiv API
 # ============================================================
-def fetch_arxiv(query: str, max_results: int = 10, categories: list = None) -> list:
+def fetch_arxiv(query: str, max_results: int = 10, categories: list = None, max_age_days: int = None) -> list:
     """从Arxiv API搜索论文"""
     papers = []
+    
+    cutoff = None
+    if max_age_days is not None and max_age_days > 0:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=max_age_days)
     
     search_parts = []
     if query:
@@ -115,8 +119,16 @@ def fetch_arxiv(query: str, max_results: int = 10, categories: list = None) -> l
                 if term:
                     cats.append(term)
             
+            # Date filter
+            if cutoff and published:
+                try:
+                    pub_date = datetime.fromisoformat(published.replace('Z', '+00:00'))
+                    if pub_date < cutoff:
+                        continue
+                except (ValueError, AttributeError):
+                    pass  # Include if we cannot parse date
+            
             # Extract primary category
-            primary_cat = ""
             for cat_el in entry.findall("arxiv:primary_category", ns):
                 primary_cat = cat_el.get("term", "")
             
@@ -381,6 +393,7 @@ def fetch_for_direction(direction: dict, config: dict) -> list:
     all_kw = primary_kw[:3] + secondary_kw[:2]  # Use top keywords to avoid too many queries
     
     sources = config.get("sources", {})
+    max_age_days = sources.get("arxiv", {}).get("lookback_days", None)
     
     # Arxiv search with primary keywords
     if sources.get("arxiv", {}).get("enabled", True):
@@ -389,6 +402,7 @@ def fetch_for_direction(direction: dict, config: dict) -> list:
                 papers = fetch_arxiv(
                     query=kw,
                     max_results=sources.get("arxiv", {}).get("max_results_per_query", 10),
+                    max_age_days=max_age_days,
                     categories=sources.get("arxiv", {}).get("categories"),
                 )
                 for p in papers:
