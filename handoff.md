@@ -340,6 +340,8 @@ sources:
 | 2026-06-23 | 关键词应用 | config.yaml应用优化：具身+6P，能量降级泛化词+10E bio过滤，科研+4P，多模态+3P，算力+8P |
 | 2026-06-23 | 效果验证 | 能量原理bio论文归零，命中SVD-Surgeon+Scaling SSM；算力命中ARGUS(10K-GPU) |
 | 2026-06-23 | 交接同步 | 关键词优化记录写入handoff.md，同步Obsidian Daily |
+| 2026-06-23 | 日期过滤修复 | fetch_arxiv新增max_age_days参数，方向搜索按published日期过滤730天，彻底消除2022年FlashAttention等旧论文渗漏 |
+| 2026-06-23 | 验证通过 | 修复后运行推荐全部为2026年论文，零旧论文渗漏 |
 
 ---
 
@@ -580,6 +582,7 @@ Windows Task Scheduler 仍自动运行 `python main.py`（本地模式），
 
 | 陷阱 | 现象 | 修复 |
 |------|------|------|
+| 旧论文渗漏 | 方向关键词搜索返回2022年FlashAttention等旧论文 | fetch_arxiv已有max_age_days=730过滤，按published字段过滤 |
 | 电池模式跳过 | 周一/周四 11:00 未运行，Next Run 跳到下次 | 运行: `powershell -Command "$task = Get-ScheduledTask -TaskName 'PaperAutomation'; $task.Settings.DisallowStartIfOnBatteries = $false; $task.Settings.StopIfGoingOnBatteries = $false; Set-ScheduledTask -TaskName 'PaperAutomation' -Settings $task.Settings"` |
 | PyYAML 丢失 | `ModuleNotFoundError: No module named 'yaml'` | main.py 已内置自动安装，或手动 `pip install PyYAML` |
 
