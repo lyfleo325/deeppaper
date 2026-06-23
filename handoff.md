@@ -336,6 +336,123 @@ sources:
 | 2026-06-22 | 手动补跑 | 6/22周一管线手动运行，92.6s完成10篇推荐 |
 | 2026-06-22 | 精读增强 | 5篇勾选论文完成10/10全段精读(含详细实验数据+优劣势+5维评分) |
 | 2026-06-22 | 规范完善 | 精读笔记所有章节必须实质性填写，不得使用占位符 |
+| 2026-06-23 | 关键词审计 | 基于推荐质量分析5方向筛选词，输出优化建议 |
+
+---
+
+## 关键词推荐优化 (2026-06-23 审计)
+
+基于近期推荐论文质量分析，对5方向筛选关键词进行审计与优化建议。
+
+### 审计方法
+- 分析2026-06-17至06-22的50+篇推荐论文
+- 评估各方向命中精度（是否匹配方向主题）
+- 识别误分类案例及其根因
+
+### 方向1：具身智能 (PhysBrain) ⭐ 精度较好
+
+**现有关键词**: embodied intelligence, embodied AI, robot learning, world model, manipulation, navigation, sim-to-real, VLA, humanoid robot (18 primary, 9 secondary)
+
+**审计发现**:
+- "world model" 过于宽泛，命中大量非具身论文（纯CV/语言模型的世界模型）
+- "humanoid robot" 命中面过窄
+- 缺少"visuomotor"、"dexterous"等2025-2026前沿热词
+
+**优化建议**:
+| 变更 | 关键词 | 原因 |
+|------|--------|------|
+| 新增Primary | `visuomotor policy`, `dexterous manipulation` | VLA/灵巧操作前沿 |
+| 新增Primary | `bimanual`, `mobile manipulation` | 双臂/移动操作 |
+| 新增Primary | `robot foundation model`, `robot pretraining` | 机器人基础模型 |
+| 新增Secondary | `imitation learning robotics`, `RL robotics` | 明确标注robotics避免泛化 |
+| 降级 | `world model` → `world model robotics` | 加限定词降噪 |
+| 新增Exclude | `language model` (不含robot/embodied) | 过滤纯NLP世界模型 |
+
+### 方向2：能量原理 ⚠️ 精度较差，需重点优化
+
+**现有关键词**: energy-based model, transformer architecture, attention mechanism, SSM, Mamba, MoE, quantization, optimization landscape (20 primary, 13 secondary)
+
+**审计发现**:
+- "transformer architecture"、"attention mechanism" 命中几乎所有ML论文，方向辨识度极低
+- "SSM" 和 "Mamba" 单独作为关键词会误匹配应用类论文（如语义分割）
+- Moebius(图像修复)误分类：仅因涉及"高效架构"被归入
+- 能量原理的本质是"模型架构效率与学习动力学的理论分析"，非具体架构名称
+
+**优化建议（聚焦方向本质）**:
+| 变更 | 关键词 | 原因 |
+|------|--------|------|
+| **保留Primary** | `energy-based model`, `learning dynamics`, `optimization landscape`, `neural scaling law` | 核心理论方向 |
+| **保留Primary** | `state space model Mamba` (合并), `mixture of experts routing` | 加限定词提纯 |
+| 新增Primary | `model compression theory`, `pruning theory` | 模型压缩的理论分析 |
+| 新增Primary | `training dynamics analysis`, `loss landscape analysis` | 训练动力学 |
+| 降级Secondary | `transformer architecture`, `attention mechanism` | 太泛→仅辅助 |
+| 降级Secondary | `SSM`, `Mamba` (单独) | 移到辅助避免独立匹配 |
+| 新增Secondary | `information bottleneck deep learning`, `neural collapse` | 理论框架 |
+| 新增Exclude | `semantic segmentation`, `object detection` | 过滤纯应用CV |
+| 新增Exclude | `image inpainting`, `image generation` | 过滤生成式CV |
+
+### 方向3：科研智能体 ✅ 精度好
+
+**现有关键词**: AI scientist, research agent, LLM agent, multi-agent, tool use, code generation agent (15 primary, 12 secondary)
+
+**审计发现**: 命中精度较高，推荐论文均与科研自动化/多智能体直接相关。
+
+**优化建议（小幅增强）**:
+| 变更 | 关键词 | 原因 |
+|------|--------|------|
+| 新增Primary | `agentic workflow`, `agent orchestration` | 2025-2026热词 |
+| 新增Primary | `LLM-based agent`, `tool-augmented LLM` | 补充表达 |
+| 新增Secondary | `agentic AI framework`, `autonomous coding` | 扩展覆盖 |
+| 新增Secondary | `agent evaluation benchmark` | 评估方向 |
+| 新增Exclude | `reinforcement learning game agent` | 过滤游戏RL |
+
+### 方向4：多模态认知大模型 ✅ 精度较好
+
+**现有关键词**: multimodal LLM, VLM, MLLM, visual reasoning, chain of thought multimodal, video understanding, cross-modal (15 primary, 12 secondary)
+
+**审计发现**: 命中精度较高。StylisticBias虽非传统VLM，但从"多模态认知"角度（MLLM偏见分析）仍有价值。
+
+**优化建议（小幅增强）**:
+| 变更 | 关键词 | 原因 |
+|------|--------|------|
+| 新增Primary | `multimodal agent`, `embodied VLM` | 多模态智能体 |
+| 新增Primary | `visual instruction tuning` | 指令微调 |
+| 新增Secondary | `3D scene understanding VLM` | 3D方向 |
+| 新增Secondary | `multimodal alignment`, `visual grounding` | 对齐/接地 |
+| 降级Secondary | `KV cache` (移到AI算力) | 更属于算力方向 |
+
+### 方向5：AI算力集群 ⚠️ 精度较差，需结构调整
+
+**现有关键词**: FlashAttention, HPC, GPU cluster, distributed training, model parallelism, NCCL, NVLink, RDMA, CUDA (19 primary, 14 secondary)
+
+**审计发现**:
+- 核心关键词过于偏向硬件/网络层（NCCL/NVLink/RDMA），命中面极窄
+- 大量LLM推理优化论文未被捕获（因关键词不匹配）
+- "Surgical embodied intelligence"误分类：可能"cluster"一词命中
+
+**优化建议（扩大覆盖面）**:
+| 变更 | 关键词 | 原因 |
+|------|--------|------|
+| **保留Primary** | `FlashAttention`, `GPU kernel optimization`, `distributed training` | 核心 |
+| 新增Primary | `LLM inference optimization`, `LLM serving system` | 推理优化热区 |
+| 新增Primary | `KV cache optimization`, `speculative decoding` | 从secondary提升 |
+| 新增Primary | `attention optimization`, `mixture of experts inference` | 注意力/MoE加速 |
+| 新增Primary | `continuous batching`, `model quantization deployment` | 部署优化 |
+| 降级Secondary | `NCCL`, `NVLink`, `RDMA` | 仅辅助上下文 |
+| 新增Secondary | `paged attention`, `prefix caching` | 新兴技术 |
+| 新增Secondary | `tensor parallelism`, `pipeline parallelism` (保留) | 继续辅助 |
+| 新增Exclude | `robotic surgery`, `laparoscopic` | 过滤手术机器人 |
+| 新增Exclude | `medical imaging` | 过滤医疗影像 |
+
+---
+
+## 推荐实施顺序
+
+1. **立即实施**: 方向2(能量原理)和方向5(AI算力集群)的关键词调整，精度提升最大
+2. **本周内**: 方向1(具身智能)的world model限定和热词补充
+3. **可选**: 方向3(科研智能体)和方向4(多模态)的小幅优化
+4. **验证方式**: 修改后运行3-5次管线，观察各方向命中精度的变化
+
 
 ---
 
