@@ -337,6 +337,9 @@ sources:
 | 2026-06-22 | 精读增强 | 5篇勾选论文完成10/10全段精读(含详细实验数据+优劣势+5维评分) |
 | 2026-06-22 | 规范完善 | 精读笔记所有章节必须实质性填写，不得使用占位符 |
 | 2026-06-23 | 关键词审计 | 基于推荐质量分析5方向筛选词，输出优化建议 |
+| 2026-06-23 | 关键词应用 | config.yaml应用优化：具身+6P，能量降级泛化词+10E bio过滤，科研+4P，多模态+3P，算力+8P |
+| 2026-06-23 | 效果验证 | 能量原理bio论文归零，命中SVD-Surgeon+Scaling SSM；算力命中ARGUS(10K-GPU) |
+| 2026-06-23 | 交接同步 | 关键词优化记录写入handoff.md，同步Obsidian Daily |
 
 ---
 
@@ -452,6 +455,20 @@ sources:
 2. **本周内**: 方向1(具身智能)的world model限定和热词补充
 3. **可选**: 方向3(科研智能体)和方向4(多模态)的小幅优化
 4. **验证方式**: 修改后运行3-5次管线，观察各方向命中精度的变化
+
+### 验证结果 (2026-06-23)
+
+修改后运行2次管线验证：
+
+| 方向 | 优化前命中（典型） | 优化后命中 | 改善 |
+|------|-------------------|-----------|------|
+| 具身智能 | Holodeck, ThinkingVLA | BiliVLA, KEMO | VLA/长期规划前沿 |
+| 能量原理 | biomolecular energy (2016), Lamarckian (1998) ❌ | SVD-Surgeon, Scaling SSM ✅ | **bio论文归零** |
+| 科研智能体 | Technical Taxonomy, Contagion | MAS-PromptBench, StickyInvoc | prompt优化方向 |
+| 多模态 | SpatialRGPT, StylisticBias | AIR, Each Judge | 推理+VLM评估 |
+| AI算力 | STREAM, Dynamic HPC | **ARGUS(10K-GPU)**, STREAM | 万卡集群命中 ✅ |
+
+**结论**: 方向2和方向5精度显著提升，方向1/3/4保持良好匹配。后续建议定期（每2周）审计命中质量。
 
 
 ---
