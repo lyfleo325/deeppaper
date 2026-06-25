@@ -353,6 +353,10 @@ sources:
     enabled: true
     base_url: https://api2.openreview.net/notes/search
     limit_per_query: 10
+retry:
+  max_attempts: 2
+  delay_minutes: 60
+
 notifications:
   enabled: true
   log_file: C:/Users/Leo/Documents/PaperAutomation/logs/automation.log

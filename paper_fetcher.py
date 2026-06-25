@@ -448,6 +448,14 @@ def fetch_for_direction(direction: dict, config: dict) -> list:
             except Exception as e:
                 logger.error(f"[Fetch] OR '{kw[:50]}...' failed: {e}")
     
+    # Filter by year for all sources
+    if max_age_days is not None and max_age_days > 0:
+        from datetime import datetime, timedelta, timezone
+        cutoff_year = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).year
+        before_count = len(all_papers)
+        all_papers = [p for p in all_papers if int(p.get("year", 0) or 0) >= cutoff_year]
+        logger.info(f"[Fetch] Year filter ({max_age_days}d): {before_count} -> {len(all_papers)} papers (min year: {cutoff_year})")
+    
     logger.info(f"[Fetch] Direction '{direction['name']}' total: {len(all_papers)} papers")
     return all_papers
 

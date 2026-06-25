@@ -307,10 +307,12 @@ def _generate_recommendation_reason(paper: dict, direction: dict, score) -> str:
 
 
 
-def run_pipeline(config: dict = None) -> bool:
+def run_pipeline(config: dict = None, max_retries: int = 1, retry_delay: int = 3600) -> bool:
 
     """
-    运行完整的自动化管线:
+      运行完整的自动化管线 (含重试机制):
+      max_retries: 失败后最多重试次数 (默认1，即重试1次)
+      retry_delay: 重试等待秒数 (默认3600，即1小时)
     1. Fetch papers from all sources
     2. Screen for each direction
     3. Generate deep-read notes
@@ -478,7 +480,16 @@ def main():
         logger = logging.getLogger("PaperAutomation")
         logger.info("Paper Automation initialized")
         
-        success = run_pipeline(config)
+        # Run with retry on failure
+        success = False
+        for attempt in range(config.get('retry', {}).get('max_attempts', 2)):
+            success = run_pipeline(config)
+            if success:
+                break
+            if attempt < config.get('retry', {}).get('max_attempts', 2) - 1:
+                retry_minutes = config.get('retry', {}).get('delay_minutes', 60)
+                logger.info(f'[Retry] Pipeline failed, retrying in {retry_minutes} minutes (attempt {attempt+2})...')
+                time.sleep(retry_minutes * 60)
         
         if success:
             logger.info("[OK] Automation finished successfully")
