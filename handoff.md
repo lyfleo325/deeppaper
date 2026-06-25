@@ -1,7 +1,7 @@
 ﻿# PaperAutomation — 论文自动化筛选与精读 交接文档
 
-> 创建: 2026-06-16 | 最后更新: 2026-06-22
-> 状态: 运行中 ✅ | 定时任务: 周一/周四 11:00
+> 创建: 2026-06-16 | 最后更新: 2026-06-25
+> 状态: 运行中 ✅ | 定时任务: 周一/周四 11:00 | 失败自动重试: 1小时后
 
 ---
 
@@ -342,6 +342,9 @@ sources:
 | 2026-06-23 | 交接同步 | 关键词优化记录写入handoff.md，同步Obsidian Daily |
 | 2026-06-23 | 日期过滤修复 | fetch_arxiv新增max_age_days参数，方向搜索按published日期过滤730天，彻底消除2022年FlashAttention等旧论文渗漏 |
 | 2026-06-23 | 验证通过 | 修复后运行推荐全部为2026年论文，零旧论文渗漏 |
+| 2026-06-25 | 全源年代过滤 | fetch_for_direction对S2/OpenReview也应用year截断，避免Arxiv宕机时旧论文渗入 |
+| 2026-06-25 | 失败重试 | run_pipeline失败后自动等待1小时重试(Config: retry.max_attempts=2, delay_minutes=60) |
+| 2026-06-25 | 重试配置 | config.yaml新增retry节，定时任务失败后不再直接跳到下次 |
 
 ---
 
@@ -582,6 +585,7 @@ Windows Task Scheduler 仍自动运行 `python main.py`（本地模式），
 
 | 陷阱 | 现象 | 修复 |
 |------|------|------|
+| Arxiv宕机 | 定时任务无法完成，返回429/超时 | 管线自动1小时后重试；禁用Arxiv时S2+OR场景已增加year过滤 |
 | 旧论文渗漏 | 方向关键词搜索返回2022年FlashAttention等旧论文 | fetch_arxiv已有max_age_days=730过滤，按published字段过滤 |
 | 电池模式跳过 | 周一/周四 11:00 未运行，Next Run 跳到下次 | 运行: `powershell -Command "$task = Get-ScheduledTask -TaskName 'PaperAutomation'; $task.Settings.DisallowStartIfOnBatteries = $false; $task.Settings.StopIfGoingOnBatteries = $false; Set-ScheduledTask -TaskName 'PaperAutomation' -Settings $task.Settings"` |
 | PyYAML 丢失 | `ModuleNotFoundError: No module named 'yaml'` | main.py 已内置自动安装，或手动 `pip install PyYAML` |
