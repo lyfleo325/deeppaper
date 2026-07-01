@@ -1,6 +1,6 @@
-# ============================================================
+﻿# ============================================================
 # Paper Automation - Windows Task Scheduler Setup
-# 使用 schtasks.exe 创建每周一/周四 11:00 运行的定时任务
+# 使用 schtasks.exe 创建每周一/周三 18:02 运行的定时任务
 # ============================================================
 
 param(
@@ -40,9 +40,9 @@ if ($Remove) {
 schtasks /Delete /TN $TaskName /F 2>$null
 
 # Create task: Run every Monday AND Thursday at 11:00
-# SCHTASKS syntax: /SC WEEKLY /D MON,THU /ST 11:00
+# SCHTASKS syntax: /SC WEEKLY /D MON,WED /ST 18:02
 $action = "`"$PythonPath`" `"$MainScript`""
-$cmd = "schtasks /Create /TN `"$TaskName`" /TR `"$action`" /SC WEEKLY /D MON,THU /ST 11:00 /RL LIMITED /F"
+$cmd = "schtasks /Create /TN `"$TaskName`" /TR `"$action`" /SC WEEKLY /D MON,WED /ST 18:02 /RL LIMITED /F"
 
 Write-Host "Running: schtasks /Create ..." -ForegroundColor Gray
 Write-Host ""
@@ -57,8 +57,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "============================================" -ForegroundColor Green
     Write-Host ""
     Write-Host "Schedule:" -ForegroundColor Cyan
-    Write-Host "  Every Monday    11:00 AM (Asia/Shanghai)"
-    Write-Host "  Every Thursday  11:00 AM (Asia/Shanghai)"
+    Write-Host "  Every Monday    18:02 (Asia/Shanghai)"
+    Write-Host "  Every Wednesday  18:02 (Asia/Shanghai)"
     Write-Host ""
     Write-Host "Management:" -ForegroundColor Cyan
     Write-Host "  View status:  .\setup_scheduler.ps1 -Status"
