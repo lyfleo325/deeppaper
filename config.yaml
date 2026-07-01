@@ -103,6 +103,8 @@ directions:
     - deep learning theory
     - gradient descent analysis
     - neural network optimization theory
+      - test-time reinforcement learning
+      - TTRL
     secondary:
     - pre-training efficiency
     - scaling law
