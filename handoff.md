@@ -1,7 +1,7 @@
 ﻿# PaperAutomation — 论文自动化筛选与精读 交接文档
 
-> 创建: 2026-06-16 | 最后更新: 2026-07-01
-> 状态: 运行中 ✅ | 定时任务: 周一/周三 18:02 | 失败自动重试: 1小时后
+> 创建: 2026-06-16 | 最后更新: 2026-07-03
+> 状态: 运行中 ✅ | 定时任务: 周一/周三 12:10 | PyYAML自动安装 | 失败自动重试: 1小时后
 
 ---
 
@@ -348,6 +348,8 @@ sources:
 | 2026-06-30 | 质量规范强化 | 精读笔记必须包含完整10段+相关工作+实验+理论，禁止缩写格式，修复6/29三篇缩写笔记 |
 | 2026-07-01 | 调度更新 | 定时任务从周一/周四 11:00 改为周一/周三 18:02，电源策略再次修复 |
 | 2026-07-01 | 关键词增补 | 能量原理新增 TTRL + test-time reinforcement learning 关键词 |
+| 2026-07-03 | 调度再调 | 时间从18:02改为12:10，避免日终卡点集中 |
+| 2026-07-03 | 根因修复 | PyYAML丢失导致7/1任务失败，setup_scheduler.ps1增加pip install PyYAML前置检查 |
 
 ---
 
@@ -593,7 +595,7 @@ Windows Task Scheduler 仍自动运行 `python main.py`（本地模式），
 | Arxiv宕机 | 定时任务无法完成，返回429/超时 | 管线自动1小时后重试；禁用Arxiv时S2+OR场景已增加year过滤 |
 | 旧论文渗漏 | 方向关键词搜索返回2022年FlashAttention等旧论文 | fetch_arxiv已有max_age_days=730过滤，按published字段过滤 |
 | 电池模式跳过 | 周一/周四 11:00 未运行，Next Run 跳到下次 | 运行: `powershell -Command "$task = Get-ScheduledTask -TaskName 'PaperAutomation'; $task.Settings.DisallowStartIfOnBatteries = $false; $task.Settings.StopIfGoingOnBatteries = $false; Set-ScheduledTask -TaskName 'PaperAutomation' -Settings $task.Settings"` |
-| PyYAML 丢失 | `ModuleNotFoundError: No module named 'yaml'` | main.py 已内置自动安装，或手动 `pip install PyYAML` |
+| PyYAML 丢失 | `ModuleNotFoundError: No module named 'yaml'` | setup_scheduler.ps1已增加pip install PyYAML前置检查，每次任务执行前自动安装 |
 
 ## 依赖
 

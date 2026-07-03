@@ -2,8 +2,8 @@ schedule:
   days:
   - Monday
   - Wednesday
-  hour: 18
-  minute: 2
+  hour: 12
+  minute: 10
 obsidian:
   kb_root: C:\Users\Leo\Desktop\KB
   daily_dir: Daily
