@@ -1,12 +1,13 @@
 @echo off
 REM ============================================================
-REM PaperAutomation - Pipeline Wrapper (EXAMPLE)
+REM DeepPaper - Pipeline Wrapper (EXAMPLE)
 REM Copy this file to run_pipeline.bat and update paths below
 REM ============================================================
-REM Set your Python path and project directory:
+REM Set your Python path:
 set PYTHON_PATH=C:\path\to\python.exe
-set PROJECT_DIR=C:\path\to\PaperAutomation
 
-cd /d %PROJECT_DIR%
-"%PYTHON_PATH%" -m pip install PyYAML --quiet
-"%PYTHON_PATH%" main.py
+REM Install/upgrade deeppaper (includes PyYAML)
+"%PYTHON_PATH%" -m pip install -e C:\path\to\deeppaper --quiet
+
+REM Run pipeline (add --push to push to Obsidian)
+"%PYTHON_PATH%" -m deeppaper

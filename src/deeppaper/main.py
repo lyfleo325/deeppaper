@@ -12,13 +12,11 @@ import logging
 import traceback
 from datetime import datetime
 
-# Add current dir to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from paper_fetcher import fetch_for_direction, fetch_arxiv_recent
-from paper_screener import screen_all_directions, deduplicate_papers
-from note_generator import generate_all_notes
-from obsidian_pusher import push_to_obsidian, verify_push
+from deeppaper.paper_fetcher import fetch_for_direction, fetch_arxiv_recent
+from deeppaper.paper_screener import screen_all_directions, deduplicate_papers
+from deeppaper.note_generator import generate_all_notes
+from deeppaper.obsidian_pusher import push_to_obsidian, verify_push
 
 
 def check_dependencies():
@@ -40,7 +38,7 @@ def setup_logging(config: dict) -> logging.Logger:
     """设置日志"""
     log_file = config.get("notifications", {}).get(
         "log_file",
-        os.path.join(os.path.dirname(__file__), "logs", "automation.log"),
+        os.path.join(os.getcwd(), "logs", "automation.log"),
     )
     log_dir = os.path.dirname(log_file)
     os.makedirs(log_dir, exist_ok=True)
@@ -85,15 +83,17 @@ def notify_error(config: dict, msg: str):
 
 
 def load_config() -> dict:
-    """加载配置文件"""
-    config_path = os.path.join(os.path.dirname(__file__), "config.yaml")
-    if not os.path.exists(config_path):
-        raise FileNotFoundError(f"Config not found: {config_path}")
-    
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-    
-    return config
+    """?????? ? ?? cwd ? config.yaml?fallback ? package ??"""
+    search_paths = [
+        os.path.join(os.getcwd(), "config.yaml"),
+        os.path.join(os.path.dirname(__file__), "config.yaml"),
+    ]
+    for config_path in search_paths:
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+            return config
+    raise FileNotFoundError(f"Config not found in: {search_paths}")
 
 
 
@@ -382,7 +382,7 @@ def run_pipeline(config: dict = None, max_retries: int = 1, retry_delay: int = 3
             logger.warning("No papers selected! Check keyword configuration.")
         
         # Local note directory
-        note_dir = os.path.join(os.path.dirname(__file__), "note")
+        note_dir = os.path.join(os.getcwd(), "note")
         
         # Step 3: Generate deep-read notes
         logger.info("[Step 3/5] Generating deep-read notes...")

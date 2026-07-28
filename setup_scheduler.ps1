@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # Paper Automation - Windows Task Scheduler Setup
 # 使用 schtasks.exe 创建每周一/周三 12:10 运行的定时任务
 # ============================================================
@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
 
 $TaskName = "PaperAutomation"
 $ScriptDir = "C:\Users\Leo\Documents\PaperAutomation"
-$MainScript = Join-Path $ScriptDir "main.py"
+$MainScript = "-m deeppaper"
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "  Paper Automation - Task Scheduler Setup" -ForegroundColor Cyan
@@ -41,7 +41,7 @@ schtasks /Delete /TN $TaskName /F 2>$null
 
 # Create task: Run every Monday AND Thursday at 11:00
 # SCHTASKS syntax: /SC WEEKLY /D MON,WED /ST 12:10
-$pipAction = "`"$PythonPath`" -m pip install PyYAML --quiet"; $action = "`"$PythonPath`" `"$MainScript`""; $fullAction = "cmd /c `"$pipAction & $action`""
+$pipAction = "`"$PythonPath`" -m pip install PyYAML --quiet"; $action = "`"$PythonPath`" $MainScript"; $fullAction = "cmd /c `"$pipAction & $action`""
 $cmd = "schtasks /Create /TN `"$TaskName`" /TR `"$fullAction`" /SC WEEKLY /D MON,WED /ST 12:10 /RL LIMITED /F"
 
 Write-Host "Running: schtasks /Create ..." -ForegroundColor Gray

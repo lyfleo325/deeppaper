@@ -10,3 +10,6 @@ _deepread_input.json
 _notes_queue.json
 _vcot_text.txt
 *.tmp
+*.egg-info/
+dist/
+build/

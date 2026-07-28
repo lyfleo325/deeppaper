@@ -1,0 +1,370 @@
+schedule:
+  days:
+  - Monday
+  - Wednesday
+  hour: 12
+  minute: 10
+obsidian:
+  kb_root: C:\Users\Leo\Desktop\KB
+  daily_dir: Daily
+  projects:
+    PhysBrain: Projects\PhysBrain
+    能量原理: Projects\能量原理
+    科研智能体: Projects\科研智能体
+    多模态: Projects\多模态
+    AI算力集群: Projects\AI算力集群
+  mocs:
+    智能体: MOCs\智能体.md
+    全部论文: MOCs\全部论文.md
+papers_per_direction: 2
+directions:
+- name: 具身智能
+  ob_project: PhysBrain
+  tag: embodied-ai
+  moc_link: PhysBrain
+  keywords:
+    primary:
+    - embodied intelligence
+    - embodied AI
+    - robot learning
+    - world model
+    - embodied foundation model
+    - physical world
+    - manipulation
+    - navigation
+    - sim-to-real
+    - reinforcement learning robotics
+    - imitation learning
+    - visuomotor
+    - VLA
+    - vision-language-action
+    - robot manipulation
+    - dexterous manipulation
+    - quadruped
+    - humanoid robot
+    - visuomotor policy
+    - bimanual manipulation
+    - robot foundation model
+    - imitation learning robotics
+    - world model robotics
+    secondary:
+    - benchmark embodied
+    - robot dataset
+    - simulation environment
+    - grasping
+    - locomotion
+    - task planning
+    - skill learning
+    - transfer learning
+    - domain randomization
+    - mobile manipulation
+    - reinforcement learning robotics
+    - robot pretraining
+    exclude:
+    - medical
+    - bio
+    - chemistry
+    - language model
+  venue_filter:
+  - CoRL
+  - ICRA
+  - IROS
+  - RSS
+  - NeurIPS
+  - ICLR
+  - ICML
+  - CVPR
+  - arXiv
+- name: 能量原理
+  ob_project: 能量原理
+  tag: energy-principles
+  moc_link: 能量原理
+  keywords:
+    primary:
+    - energy-based model
+    - energy function
+    - state space model
+    - sparse attention
+    - mixture of experts
+    - MoE
+    - model compression
+    - knowledge distillation
+    - learning dynamics
+    - optimization landscape
+    - loss landscape
+    - neural tangent kernel
+    - state space model Mamba
+    - mixture of experts routing
+    - learning dynamics analysis
+    - loss landscape analysis
+    - training dynamics analysis
+    - model compression theory
+    - neural scaling law analysis
+    - deep learning theory
+    - gradient descent analysis
+    - neural network optimization theory
+      - test-time reinforcement learning
+      - TTRL
+    secondary:
+    - pre-training efficiency
+    - scaling law
+    - training dynamics
+    - gradient flow
+    - Hessian
+    - convergence
+    - generalization bound
+    - PAC-Bayes
+    - information bottleneck
+    - entropy
+    - free energy
+    - variational inference
+    - mean field theory
+    - transformer architecture
+    - attention mechanism
+    - linear attention
+    - SSM
+    - Mamba
+    - RWKV
+    - quantization
+    - pruning
+    - information bottleneck deep learning
+    - neural collapse
+    - grokking
+    - model pruning theory
+    - sparse autoencoder
+    exclude:
+    - computer vision
+    - image segmentation
+    - object detection
+    - image inpainting
+    - image generation adversarial
+    - semantic segmentation
+    - biomolecular
+    - protein folding
+    - docking algorithm
+    - molecular dynamics
+    - genetic algorithm docking
+    - crystal structure
+    - density functional
+    - DFT
+    - molecular simulation
+    - drug design
+  venue_filter:
+  - NeurIPS
+  - ICLR
+  - ICML
+  - JMLR
+  - TMLR
+  - arXiv
+  - COLT
+- name: 科研智能体
+  ob_project: 科研智能体
+  tag: research-agent
+  moc_link: 智能体
+  keywords:
+    primary:
+    - AI scientist
+    - research agent
+    - scientific discovery
+    - automated research
+    - deep research
+    - LLM agent
+    - AI agent
+    - autonomous agent
+    - multi-agent
+    - tool use
+    - function calling
+    - code generation agent
+    - reasoning agent
+    - science of science
+    - research automation
+    - agentic workflow
+    - agent orchestration
+    - LLM-based agent
+    - tool-augmented LLM
+    secondary:
+    - agent benchmark
+    - agent evaluation
+    - SWE-bench
+    - agent framework
+    - workflow
+    - planning
+    - self-improvement
+    - self-correction
+    - reflection
+    - memory agent
+    - retrieval augmented
+    - RAG agent
+    - agentic AI framework
+    - autonomous coding
+    - agent evaluation benchmark
+    exclude:
+    - game
+    - dialogue system
+    - chatbot
+    - reinforcement learning game
+  venue_filter:
+  - NeurIPS
+  - ICLR
+  - ICML
+  - ACL
+  - EMNLP
+  - arXiv
+  - NAACL
+- name: 多模态认知大模型
+  ob_project: 多模态
+  tag: multimodal
+  moc_link: 多模态
+  keywords:
+    primary:
+    - multimodal large language model
+    - vision language model
+    - VLM
+    - MLLM
+    - multimodal reasoning
+    - visual reasoning
+    - latent reasoning
+    - chain of thought multimodal
+    - image understanding
+    - video understanding
+    - multimodal agent
+    - visual question answering
+    - cross-modal
+    - vision transformer
+    - multimodal fusion
+    - embodied VLM
+    - visual instruction tuning
+    secondary:
+    - token compression
+    - context length
+    - long context
+    - continual learning multimodal
+    - lifelong learning
+    - catastrophic forgetting
+    - task planning
+    - instruction following
+    - spatial reasoning
+    - temporal reasoning
+    - 3D scene understanding VLM
+    - multimodal alignment
+    - visual grounding
+      - OPD
+      - LLM as judge
+      - GRPO
+      - latent
+    exclude:
+    - medical imaging
+    - remote sensing
+    - satellite
+  venue_filter:
+  - CVPR
+  - ICCV
+  - ECCV
+  - NeurIPS
+  - ICLR
+  - ICML
+  - ACL
+  - EMNLP
+  - arXiv
+- name: AI算力集群
+  ob_project: AI算力集群
+  tag: ai-infrastructure
+  moc_link: AI算力集群
+  keywords:
+    primary:
+    - FlashAttention
+    - high performance computing
+    - HPC
+    - GPU cluster
+    - distributed training
+    - model parallelism
+    - pipeline parallelism
+    - tensor parallelism
+    - communication optimization
+    - all-reduce
+    - collective communication
+    - InfiniBand
+    - kernel fusion
+    - operator optimization
+    - CUDA
+    - GPU kernel
+    - LLM inference optimization
+    - LLM serving system
+    - KV cache optimization
+    - speculative decoding
+    - continuous batching
+    - attention optimization
+    - mixture of experts inference
+    - model quantization deployment
+    secondary:
+    - inference optimization
+    - speculative decoding
+    - KV cache optimization
+    - quantization inference
+    - sparsity
+    - mixed precision
+    - FP8
+    - FP4
+    - compiler optimization
+    - TVM
+    - Triton
+    - XLA
+    - memory optimization
+    - offloading
+    - NCCL
+    - NVLink
+    - RDMA
+    - paged attention
+    - prefix caching
+    - token-level routing
+    exclude:
+    - blockchain
+    - cryptocurrency
+    - edge computing IoT
+    - robotic surgery
+    - laparoscopic
+    - medical imaging
+  venue_filter:
+  - NeurIPS
+  - ICLR
+  - ICML
+  - SC
+  - PPoPP
+  - ASPLOS
+  - ISCA
+  - MICRO
+  - HPCA
+  - arXiv
+sources:
+  arxiv:
+    enabled: true
+    base_url: https://export.arxiv.org/api/query
+    max_results_per_query: 10
+    categories:
+    - cs.AI
+    - cs.LG
+    - cs.CL
+    - cs.CV
+    - cs.RO
+    - cs.AR
+    - cs.DC
+    - stat.ML
+    lookback_days: 730
+  semantic_scholar:
+    enabled: true
+    base_url: https://api.semanticscholar.org/graph/v1/paper/search
+    limit_per_query: 10
+    fields: title,year,url,abstract,externalIds,authors,venue,journal,publicationDate,citationCount
+  openreview:
+    enabled: true
+    base_url: https://api2.openreview.net/notes/search
+    limit_per_query: 10
+retry:
+  max_attempts: 2
+  delay_minutes: 60
+
+notifications:
+  enabled: true
+  log_file: C:/Users/Leo/Documents/PaperAutomation/logs/automation.log
+  method: log
+debug: false
