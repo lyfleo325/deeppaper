@@ -1,5 +1,5 @@
 """Entry point for python -m deeppaper"""
-from deeppaper.main import main
+from deeppaper.cli import cli
 
 if __name__ == "__main__":
-    main()
+    cli()

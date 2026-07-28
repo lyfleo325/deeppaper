@@ -36,6 +36,7 @@ classifiers = [
 ]
 dependencies = [
     "PyYAML>=6.0",
+    "click>=8.0",
 ]
 
 [project.optional-dependencies]
@@ -49,7 +50,7 @@ Repository = "https://github.com/lyfleo325/deeppaper"
 Issues = "https://github.com/lyfleo325/deeppaper/issues"
 
 [project.scripts]
-deeppaper = "deeppaper.main:main"
+deeppaper = "deeppaper.cli:cli"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
