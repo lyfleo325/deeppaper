@@ -42,7 +42,7 @@ schtasks /Delete /TN $TaskName /F 2>$null
 # Create task: Run every Monday AND Thursday at 11:00
 # SCHTASKS syntax: /SC WEEKLY /D MON,WED /ST 12:10
 $pipAction = "`"$PythonPath`" -m pip install PyYAML --quiet"; $action = "`"$PythonPath`" `"$MainScript`""; $fullAction = "cmd /c `"$pipAction & $action`""
-$cmd = "schtasks /Create /TN `"$TaskName`" /TR `"$action`" /SC WEEKLY /D MON,WED /ST 12:10 /RL LIMITED /F"
+$cmd = "schtasks /Create /TN `"$TaskName`" /TR `"$fullAction`" /SC WEEKLY /D MON,WED /ST 12:10 /RL LIMITED /F"
 
 Write-Host "Running: schtasks /Create ..." -ForegroundColor Gray
 Write-Host ""

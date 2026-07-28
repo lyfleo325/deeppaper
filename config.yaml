@@ -248,6 +248,10 @@ directions:
     - 3D scene understanding VLM
     - multimodal alignment
     - visual grounding
+      - OPD
+      - LLM as judge
+      - GRPO
+      - latent
     exclude:
     - medical imaging
     - remote sensing

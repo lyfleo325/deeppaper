@@ -1,0 +1,12 @@
+@echo off
+REM ============================================================
+REM PaperAutomation - Pipeline Wrapper (EXAMPLE)
+REM Copy this file to run_pipeline.bat and update paths below
+REM ============================================================
+REM Set your Python path and project directory:
+set PYTHON_PATH=C:\path\to\python.exe
+set PROJECT_DIR=C:\path\to\PaperAutomation
+
+cd /d %PROJECT_DIR%
+"%PYTHON_PATH%" -m pip install PyYAML --quiet
+"%PYTHON_PATH%" main.py

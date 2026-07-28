@@ -98,13 +98,13 @@ def load_config() -> dict:
 
 
 def _translate_abstract(text: str) -> str:
-    """Translate English abstract to Simplified Chinese via Google Translate"""
+    """Translate English abstract to Simplified Chinese via Google Translate."""
     if not text or len(text) < 10:
         return text
+    import urllib.request, urllib.parse, json
+
     try:
-        import urllib.request, urllib.parse, json
-        chunk = text[:800]
-        q = urllib.parse.quote(chunk)
+        q = urllib.parse.quote(text)
         url = f"https://translate.google.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q={q}"
         req = urllib.request.Request(url, headers={
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -113,13 +113,11 @@ def _translate_abstract(text: str) -> str:
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             translated = "".join([s[0] for s in result[0] if s and s[0]])
-            if translated and len(translated) > 5 and translated != text:
-                return translated
+        if translated and len(translated) > 5 and translated != text:
+            return translated
     except Exception as e:
         logging.getLogger("PaperAutomation").warning(f"[Translate] Failed: {e}")
     return text  # fallback to original
-
-
 def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_dir: str) -> str:
     """Generate PaperAuto Checklist to Obsidian Daily with recommendation reasons"""
     import logging
@@ -208,12 +206,12 @@ def generate_summary_list(all_notes: dict, screened: dict, config: dict, note_di
 
             lines.append("**\U0001f524 \u82f1\u6587\u6458\u8981**")
             lines.append("")
-            lines.append(f"> {abstract[:1000]}")
+            lines.append(f"> {abstract}")
             lines.append("")
 
             lines.append("**\U0001f1e8\U0001f1f3 \u4e2d\u6587\u6458\u8981**")
             lines.append("")
-            lines.append(f"> {zh_abstract[:1000]}")
+            lines.append(f"> {zh_abstract}")
             lines.append("")
 
             lines.append("**\U0001f4a1 \u63a8\u8350\u539f\u56e0\u4e0e\u65b9\u5411\u5173\u8054**")
@@ -364,7 +362,7 @@ def run_pipeline(config: dict = None, max_retries: int = 1, retry_delay: int = 3
                 err_msg = f"Fetch for '{dir_name}' failed: {e}"
                 logger.error(err_msg)
                 all_errors.append(err_msg)
-            time.sleep(2)  # Rate limiting between directions
+            time.sleep(5)  # P0: increased from 2s to 5s between directions
         
         # Dedup all papers
         all_papers = deduplicate_papers(all_papers)

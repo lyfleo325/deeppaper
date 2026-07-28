@@ -395,12 +395,15 @@ def fetch_for_direction(direction: dict, config: dict) -> list:
     sources = config.get("sources", {})
     max_age_days = sources.get("arxiv", {}).get("lookback_days", None)
     
-    # Arxiv search with primary keywords
+    # Arxiv search with combined primary keywords (P0: merge 3→1 query + 10s delay + 60s 429 cooldown)
     if sources.get("arxiv", {}).get("enabled", True):
-        for kw in primary_kw[:3]:
+        arxiv_kws = [kw for kw in primary_kw[:3] if kw]
+        if arxiv_kws:
+            combined_query = " OR ".join(f'"{kw}"' for kw in arxiv_kws)
+            logger.info(f"[Fetch] Arxiv combined query: {len(arxiv_kws)} keywords merged")
             try:
                 papers = fetch_arxiv(
-                    query=kw,
+                    query=combined_query,
                     max_results=sources.get("arxiv", {}).get("max_results_per_query", 10),
                     max_age_days=max_age_days,
                     categories=sources.get("arxiv", {}).get("categories"),
@@ -410,9 +413,16 @@ def fetch_for_direction(direction: dict, config: dict) -> list:
                     if key not in seen_titles:
                         seen_titles.add(key)
                         all_papers.append(p)
-                time.sleep(1)  # Rate limit
+                if not papers:
+                    logger.warning("[Fetch] Arxiv returned 0 results (possible 429), cooling down 60s...")
+                    time.sleep(60)
+                else:
+                    logger.info(f"[Fetch] Arxiv returned {len(papers)} papers, waiting 10s...")
+                    time.sleep(10)
             except Exception as e:
-                logger.error(f"[Fetch] Arxiv '{kw[:50]}...' failed: {e}")
+                logger.error(f"[Fetch] Arxiv combined query failed: {e}")
+                logger.warning("[Fetch] Arxiv failure, cooling down 60s before next source...")
+                time.sleep(60)
     
     # Semantic Scholar with primary keywords
     if sources.get("semantic_scholar", {}).get("enabled", True):

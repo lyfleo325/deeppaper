@@ -1,5 +1,12 @@
-__pycache__/
+﻿__pycache__/
 *.pyc
 *.pyo
 logs/*.log
 note/
+work/
+run_pipeline.bat
+_paper_data.json
+_deepread_input.json
+_notes_queue.json
+_vcot_text.txt
+*.tmp
