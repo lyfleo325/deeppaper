@@ -8,20 +8,20 @@ obsidian:
   kb_root: C:\Users\Leo\Desktop\KB
   daily_dir: Daily
   projects:
-    PhysBrain: Projects\PhysBrain
-    能量原理: Projects\能量原理
-    科研智能体: Projects\科研智能体
-    多模态: Projects\多模态
-    AI算力集群: Projects\AI算力集群
+    project-1: Projects\project-1
+    project-2: Projects\project-2
+    project-3: Projects\project-3
+    project-4: Projects\project-4
+    project-5: Projects\project-5
   mocs:
-    智能体: MOCs\智能体.md
-    全部论文: MOCs\全部论文.md
+    project-3: MOCs\project-3.md
+    all-papers: MOCs\all-papers.md
 papers_per_direction: 2
 directions:
-- name: 具身智能
-  ob_project: PhysBrain
-  tag: embodied-ai
-  moc_link: PhysBrain
+- name: Research Direction 1
+  ob_project: project-1
+  tag: dir-1
+  moc_link: project-1
   keywords:
     primary:
     - embodied intelligence
@@ -75,10 +75,10 @@ directions:
   - ICML
   - CVPR
   - arXiv
-- name: 能量原理
-  ob_project: 能量原理
-  tag: energy-principles
-  moc_link: 能量原理
+- name: Research Direction 2
+  ob_project: project-2
+  tag: dir-2
+  moc_link: project-2
   keywords:
     primary:
     - energy-based model
@@ -157,10 +157,10 @@ directions:
   - TMLR
   - arXiv
   - COLT
-- name: 科研智能体
-  ob_project: 科研智能体
-  tag: research-agent
-  moc_link: 智能体
+- name: Research Direction 3
+  ob_project: project-3
+  tag: dir-3
+  moc_link: project-3
   keywords:
     primary:
     - AI scientist
@@ -211,10 +211,10 @@ directions:
   - EMNLP
   - arXiv
   - NAACL
-- name: 多模态认知大模型
-  ob_project: 多模态
-  tag: multimodal
-  moc_link: 多模态
+- name: Research Direction 4
+  ob_project: project-4
+  tag: dir-4
+  moc_link: project-4
   keywords:
     primary:
     - multimodal large language model
@@ -266,10 +266,10 @@ directions:
   - ACL
   - EMNLP
   - arXiv
-- name: AI算力集群
-  ob_project: AI算力集群
-  tag: ai-infrastructure
-  moc_link: AI算力集群
+- name: Research Direction 5
+  ob_project: project-5
+  tag: dir-5
+  moc_link: project-5
   keywords:
     primary:
     - FlashAttention

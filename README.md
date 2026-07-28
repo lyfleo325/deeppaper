@@ -8,7 +8,7 @@
 </p>
 
 > **DeepPaper** — A fully automated academic paper discovery, screening, and deep-reading pipeline.  
-> Three sources. Five research directions. Your Obsidian knowledge base, always up to date.
+> Three sources. Research directions. Your Obsidian knowledge base, always up to date.
 
 ---
 
@@ -65,8 +65,8 @@ Commands:
 ```bash
 deeppaper run                  # Generate checklist (local-only)
 deeppaper run --push           # Push deep-read notes to Obsidian
-deeppaper run -d 具身智能       # Only run one direction
-deeppaper run -d 具身智能 -d 多模态  # Run specific directions
+deeppaper run -d "Research Direction 1"       # Only run one direction
+deeppaper run -d "Research Direction 1" -d "Research Direction 4"  # Run specific directions
 ```
 
 ### deeppaper doctor
@@ -134,17 +134,17 @@ DeepPaper runs a **5-step pipeline** every cycle:
 
 ---
 
-## Five research directions
+## Research directions
 
 Each direction has curated keyword sets (primary + secondary), exclusion filters, and venue constraints — all in `config.yaml`.
 
 | # | Direction | Project Tag | Focus |
 |---|-----------|-------------|-------|
-| 1 | **具身智能 (Embodied AI)** | `PhysBrain` | Robot learning, VLA, manipulation, sim-to-real, humanoid |
-| 2 | **能量原理 (Energy Principles)** | `能量原理` | EBMs, SSMs, MoE, learning dynamics, optimization landscape |
-| 3 | **科研智能体 (Research Agents)** | `科研智能体` | AI Scientist, multi-agent, tool use, autonomous research |
-| 4 | **多模态认知大模型 (Multimodal)** | `多模态` | VLM, MLLM, visual reasoning, multimodal alignment, OPD/GRPO |
-| 5 | **AI算力集群 (AI Infrastructure)** | `AI算力集群` | HPC, GPU clusters, distributed training, FlashAttention, inference optimization |
+| 1 | **Research Direction 1** | `dir-1` | Robot learning, VLA, manipulation, sim-to-real, humanoid |
+| 2 | **Research Direction 2** | `dir-2` | EBMs, SSMs, MoE, learning dynamics, optimization landscape |
+| 3 | **Research Direction 3** | `dir-3` | AI Scientist, multi-agent, tool use, autonomous research |
+| 4 | **Research Direction 4** | `dir-4` | VLM, MLLM, visual reasoning, multimodal alignment |
+| 5 | **Research Direction 5** | `dir-5` | HPC, GPU clusters, distributed training, inference optimization |
 
 Each direction outputs **top 2 papers per cycle** (configurable: `papers_per_direction`).
 
@@ -196,9 +196,9 @@ Example after a run:
 KB/
 ├── Daily/2026-7-28/
 │   └── VLMR1-...-论文精读.md
-├── Projects/多模态/
+├── Projects/project-4/
 │   └── VLMR1-...-论文精读.md
-└── MOCs/多模态.md   ← [[VLMR1|VLMR1: Stable...]]
+└── MOCs/project-4.md   ← [[VLMR1|VLMR1: Stable...]]
 ```
 
 ---
