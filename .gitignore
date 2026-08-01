@@ -1,4 +1,4 @@
-﻿__pycache__/
+__pycache__/
 *.pyc
 *.pyo
 logs/*.log
@@ -13,3 +13,4 @@ _vcot_text.txt
 *.egg-info/
 dist/
 build/
+config.yaml
